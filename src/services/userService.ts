@@ -2,17 +2,18 @@ import { BASE_WS_URL } from "@/libs/constant";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { getAccessToken } from "./authService";
 import { userConnection } from "./hubConnection";
+import { User } from "@/libs/types";
 
 
-userConnection.start();
+// userConnection.start();
 const searchUser = async (searchTerm: string) => {
     return userConnection
       .invoke('SearchUser', searchTerm);      
 }
 
-const getEmotions = async () => {
+const getReactions = async () => {
     return userConnection
-      .invoke('GetEmotions');      
+      .invoke('GetReactions');      
 }
 const onConnected = (eventHandler: (user: User) => void) => {
     userConnection.on("OnConnected", user => {  
@@ -27,7 +28,7 @@ const onDisconnected = (eventHandler: (message: string) => void) => {
 
 export const userService = {
     searchUser,
-    getEmotions,
+    getReactions,
     onConnected,
     onDisconnected
 }

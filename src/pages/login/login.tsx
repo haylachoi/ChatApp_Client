@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import React from "react";
 import { authService, setToken } from "../../services/authService";
 import { useUserStore } from "../../stores/userStore";
+import { fileService } from "@/services/fileService";
 
 
 
@@ -25,7 +26,7 @@ const Login = () => {
       setAvatar({
         file: e.target.files[0],
         url: URL.createObjectURL(e.target.files[0]),
-      });
+      });   
     }
   };
 
@@ -35,9 +36,9 @@ const Login = () => {
     
     const formData = new FormData(e.target as HTMLFormElement);
 
-    const fullname = formData.get("fullname") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    // const fullname = formData.get("fullname") as string;
+    // const email = formData.get("email") as string;
+    // const password = formData.get("password") as string;
 
 
     // VALIDATE INPUTS
@@ -47,7 +48,8 @@ const Login = () => {
   
 
     try {
-      const response = await authService.register({email, password, fullname})
+      // const response = await authService.register({email, password, fullname})
+      const response = await authService.register(formData);
       var data = await response.json();
       console.log(data);
       if (!response.ok){
@@ -63,14 +65,14 @@ const Login = () => {
     }
   };
 
-  const handleLogin = async (e: FormEvent) => {
+  const handleLogin: React.FormEventHandler<HTMLFormElement> | undefined = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    const formData = new FormData(e.target as HTMLFormElement);
+   
+    const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-
+    
     try {
       const response = await authService.login({email,password});
       const data = await response.json(); 
@@ -107,6 +109,7 @@ const Login = () => {
           <input
             type="file"
             id="file"
+            name="file"
             style={{ display: "none" }}
             onChange={handleAvatar}
           />

@@ -5,6 +5,7 @@ import React from "react";
 import { userService } from "@/services/userService";
 import { useUserStore } from "@/stores/userStore";
 import { roomService } from "@/services/roomService";
+import { User } from "@/libs/types";
 
 const AddUser = () => {
   const [users, setUsers] = useState<User[]>([]);

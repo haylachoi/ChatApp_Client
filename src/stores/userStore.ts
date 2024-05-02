@@ -1,3 +1,4 @@
+import { User } from "@/libs/types";
 import { create } from "zustand";
 
 

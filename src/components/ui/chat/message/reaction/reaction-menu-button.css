@@ -1,0 +1,71 @@
+.reaction-menu-bar-btn {
+  --menu-bar-btn: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: var(--menu-bar-btn);
+  height: var(--menu-bar-btn);
+  border-radius: 9999px;
+  background-color: white;
+  overflow: hidden;
+  
+  button {
+    outline: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  
+  .reaction-icon {
+    width: 15px;
+    height: 15px;
+    color: black;
+  }
+  .reaction-system-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -100%);
+    /* display: none; */
+    display: flex;
+    border-radius: 9999px;
+    gap: 10px;
+    visibility: hidden;
+    background-color: white;
+    visibility: 0.2;
+    opacity: 0.3;
+    transition: padding 0.2s, opacity 0.2s;
+   
+    button {
+        width: 25px;
+        height: 25px;      
+        position: relative;
+    
+        .reaction-btn-icon {
+          width: 20px;
+          height: 20px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          transition: width height 0.2s;
+    
+          &:hover {
+            width: 23px;
+            height: 23px;
+          }
+        }
+      }
+  }
+
+  &:hover {
+    .reaction-system-bar {    
+      /* display: flex; */
+      visibility: visible;
+      opacity: 1;
+      padding: 5px 25px;
+     
+    }
+  }
+ 
+}

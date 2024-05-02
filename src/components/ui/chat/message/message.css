@@ -1,0 +1,71 @@
+.message-box {
+  max-width: 70%;
+  min-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  background-color: rgba(17, 25, 40, 0.3);
+  padding: 10px;
+  border-radius: 10px;
+  align-self: start;
+  &.own {
+    background-color: #5183fe;
+    align-self: flex-end;  
+  }
+
+  .message-content {  
+    
+    p {
+      font-size: 1.25rem;
+      word-wrap: break-word;
+    }
+    img {
+      width: 100%;
+      height: 300px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+  }
+
+
+  .reaction-tray {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: white;
+    border-radius: 9999px;
+    padding: 0 10px;
+    height: 22px;
+    transform: translate(-40px, 50%);
+    .reaction-icon {
+    
+      color: black;
+      width: 15px;
+      height: 15px;
+      
+    }
+  }
+
+  .reaction-menu {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    transform: translate(-10%, 50%);
+  }
+  
+  &:hover {
+    .reaction-menu {
+      display: block;
+    }
+  }
+ .message-status{
+
+  span {
+    font-size: 9px;
+  }
+ }
+}

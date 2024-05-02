@@ -1,14 +1,18 @@
-interface UserInfo {
+
+import { LucideIcon } from "lucide-react";
+
+
+export interface UserInfo {
     email: string,
     fullname: string
 }
 
-interface Token {
+export interface Token {
     accessToken: string,
     refreshToken: string
 }
 
-interface User {
+export interface User {
     id: string | undefined;
     email: string;
     fullname: string | undefined;
@@ -16,7 +20,7 @@ interface User {
     isOnline: boolean;
 }
 
-interface Message {
+export interface Message {
     id: string ;
     content: string;
     senderId: string;
@@ -24,14 +28,17 @@ interface Message {
     privateRoomId: string;
     createdAt: string | undefined;
     isReaded: boolean;
+    reactionId: number | undefined;
 }
-interface PrivateRoomInfo {
+export interface PrivateRoomInfo {
     userId: string,
+    privateRoomId: string;
     firstMessageId: string | undefined;
     firstUnseenMessageId: string | undefined;
+    canRoomDisplay: boolean;
     unseenMessageCount: number;
 }
-interface PrivateRoom {
+export interface PrivateRoom {
     id: string;
     friend: User;
     previousLastMessageId: string | undefined;
@@ -40,15 +47,38 @@ interface PrivateRoom {
     firstUnseenMessageId: string;
     lastUnseenMessage: Message | undefined;
     unseenMessageCount: number | undefined;
+    canRoomDisplay: boolean;
     privateRoomInfos: PrivateRoomInfo[]
     chats: Message[];
 }
 
-interface Emotion {
+export interface Room {  
+    id: string;
+    name: string | undefined;
+    isGroup: boolean;
+    lastMessageId: string;
+    firstMessageId: string;
+    currentMemberInfo: RoomMemberInfo;
+    roomMemberInfo: RoomMemberInfo[];
+}
+
+export interface RoomMemberInfo {
+    memberId: string;
+    fullName: string;
+    firstUnseenMessageId: string;
+    lastUnseenMessageId: string;
+    unseenMessageCount: string;
+    canDisplayRoom: boolean;
+    canShowNotification: boolean;
+    lastUnseenMessage: Message;
+}
+export interface Reaction {
     id: number;
     name: string;
+    icon: LucideIcon;
 }
-interface HubResponse<T> {
+export interface HubResponse<T> {
     isSuccess: boolean;
     data: T;
 }
+

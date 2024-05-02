@@ -1,9 +1,10 @@
 
-import { REST_BASEENDPOINT } from "../libs/constant"
+import { Token, UserInfo } from "@/libs/types";
+import { REST_SEGMENT } from "../libs/constant"
 
 
 const login = (data: {email : string, password: string}) => {
-    const url = `${REST_BASEENDPOINT.auth}/login`;
+    const url = `${REST_SEGMENT.AUTH}/login`;
     const response = fetch(url, {
         method: "POST",
         headers: {
@@ -14,20 +15,28 @@ const login = (data: {email : string, password: string}) => {
     return response;
 }
 
-const register = (data: {email : string, password: string, fullname: string}) => {
-    const url = `${REST_BASEENDPOINT.auth}/register`;
+// const register = (data: {email : string, password: string, fullname: string}) => {
+//     const url = `${REST_SEGMENT.auth}/register`;
+//     const response = fetch(url, {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json",         
+//           },
+//         body: JSON.stringify(data)
+//     })
+//     return response;
+// }
+
+const register = (formData: FormData) => {
+    const url = `${REST_SEGMENT.AUTH}/register`;
     const response = fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",         
-          },
-        body: JSON.stringify(data)
+        method: "POST",       
+        body: formData
     })
     return response;
 }
-
 const getProfile = () => {
-    const url = `${REST_BASEENDPOINT.auth}/profile`;
+    const url = `${REST_SEGMENT.AUTH}/profile`;
     const response = fetch(url, {
         method: "GET",
         headers: {

@@ -1,7 +1,11 @@
+import { HubResponse, Message, PrivateRoom, PrivateRoomInfo } from '@/libs/types';
+
 import {privateRoomConnection} from "./hubConnection";
+import { generatePublisher } from '@/libs/utils';
 
-
-privateRoomConnection.start();
+const subscribers = {
+    createRoom: new Map<string, (room: PrivateRoom) => void>(),
+  }
 const getPrivateRooms = async () => {
     return privateRoomConnection
       .invoke('GetPrivateRooms');      
@@ -12,30 +16,39 @@ const createPrivateRoom = async (friendId: string) => {
       .invoke('CreatePrivateRoom', friendId);      
 }
 
-const onCreateRoom = (eventHandler: (room: any) => void) => {
-    privateRoomConnection.on("CreatePrivateRoom", room => {  
-        eventHandler(room);
-    })
+const onCreateRoom = generatePublisher(subscribers.createRoom);
+
+const canRoomDisplay = async (roomId: string, canDisplay: boolean): Promise<HubResponse<PrivateRoomInfo>> => {
+    return privateRoomConnection.invoke("UpdateCanRoomDisplay", roomId, canDisplay);
 }
 const getSomePrivateMessages = async (roomId: string): Promise<HubResponse<Message[]>> => {
-    return privateRoomConnection.invoke("GetSomePrivateMessages", roomId)
+    return privateRoomConnection.invoke("GetSomePrivateMessages", roomId);
 }
 
 const getFirstMessage = async (roomId: string): Promise<HubResponse<Message>> => {
-    return privateRoomConnection.invoke("GetFirstMessage", roomId)
+    return privateRoomConnection.invoke("GetFirstMessage", roomId);
 }
 
+
+
 const getNextPrivateMessages = async (roomId: string, messageId: string, numberMessage: number | null = 10) : Promise<HubResponse<Message[]>> => {
-    return privateRoomConnection.invoke("GetNextPrivateMessages", roomId, messageId, numberMessage)
+    return privateRoomConnection.invoke("GetNextPrivateMessages", roomId, messageId, numberMessage);
 }
 
 const getPreviousPrivateMessages = async (roomId: string, messageId: string, numberMessage: number | null = 10) : Promise<HubResponse<Message[]>> => {
-    return privateRoomConnection.invoke("GetPreviousPrivateMessages", roomId, messageId, numberMessage)
+    return privateRoomConnection.invoke("GetPreviousPrivateMessages", roomId, messageId, numberMessage);
 }
+
+privateRoomConnection.on("CreatePrivateRoom", room => {  
+    subscribers.createRoom.forEach(eventHandler=> {
+        eventHandler(room);
+    })
+})
 export const roomService = {
     getSomePrivateMessages,
     getPrivateRooms,
     createPrivateRoom,
+    updateCanMessageDisplay: canRoomDisplay,
     onCreateRoom,
     getFirstMessage: getFirstMessage,
     getNextPrivateMessages,
