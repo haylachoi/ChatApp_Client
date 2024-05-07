@@ -1,37 +1,42 @@
-
 import { LucideIcon } from "lucide-react";
 
 
 export interface UserInfo {
-    email: string,
+    email: string;
     fullname: string
 }
 
 export interface Token {
-    accessToken: string,
+    accessToken: string;
     refreshToken: string
 }
 
 export interface User {
-    id: string | undefined;
+    id: string;
     email: string;
     fullname: string | undefined;
-    avatar: string;
+    avatar: string | undefined;
     isOnline: boolean;
 }
 
-export interface Message {
+export interface MessageData {
     id: string ;
     content: string;
     senderId: string;
     isImage: boolean;
-    privateRoomId: string;
+    roomId: string;
     createdAt: string | undefined;
-    isReaded: boolean;
-    reactionId: number | undefined;
+    messageDetails: MessageDetail[]
+}
+export interface MessageDetail {
+    id: string;
+    userId: string;
+    messageId: string;
+    reactionId: string;
+    user: User
 }
 export interface PrivateRoomInfo {
-    userId: string,
+    userId: string;
     privateRoomId: string;
     firstMessageId: string | undefined;
     firstUnseenMessageId: string | undefined;
@@ -45,40 +50,49 @@ export interface PrivateRoom {
     lastMessageId: string | undefined;
     firstMessageId: string | undefined;
     firstUnseenMessageId: string;
-    lastUnseenMessage: Message | undefined;
+    lastUnseenMessage: MessageData | undefined;
     unseenMessageCount: number | undefined;
     canRoomDisplay: boolean;
     privateRoomInfos: PrivateRoomInfo[]
-    chats: Message[];
+    chats: MessageData[];
 }
 
-export interface Room {  
+export interface RawRoom {  
     id: string;
     name: string | undefined;
     isGroup: boolean;
+    avatar: string | undefined;
     lastMessageId: string;
     firstMessageId: string;
-    currentMemberInfo: RoomMemberInfo;
-    roomMemberInfo: RoomMemberInfo[];
+    roomMemberInfos: RoomMemberInfo[];
+}
+export interface Room extends Omit<RawRoom, "roomMemberInfos"> {
+    currentRoomMemberInfo: RoomMemberInfo;
+    otherRoomMemberInfos: RoomMemberInfo[];
+    chats : MessageData[] | undefined;
+   
 }
 
 export interface RoomMemberInfo {
-    memberId: string;
-    fullName: string;
+    userId: string;
+    user: User;
     firstUnseenMessageId: string;
     lastUnseenMessageId: string;
     unseenMessageCount: string;
     canDisplayRoom: boolean;
     canShowNotification: boolean;
-    lastUnseenMessage: Message;
+    lastUnseenMessage: MessageData;
+    previousLastMessageId: string | undefined;  
 }
 export interface Reaction {
-    id: number;
+    id: string;
     name: string;
     icon: LucideIcon;
 }
+
 export interface HubResponse<T> {
     isSuccess: boolean;
     data: T;
+    error: any;
 }
 

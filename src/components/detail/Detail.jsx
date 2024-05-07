@@ -1,7 +1,7 @@
 import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { useChatStore } from "../../stores/chatStore";
 import { auth, db } from "../../stores/firebase";
-import { useUserStore } from "../../../stores/userStore";
+import { useUserStore } from "../../stores/userStore";
 import "./detail.css";
 
 const Detail = () => {

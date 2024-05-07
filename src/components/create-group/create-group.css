@@ -1,0 +1,54 @@
+.create-group {
+--button-width: 100px;
+--button-height: 50px;
+  width: 600px;
+  height: clamp(300px, 40vh + 5rem ,800px);
+  padding: 30px;
+  background-color: rgba(17, 25, 40, 0.781);
+  border-radius: 10px;
+  form{
+    display: flex;
+    gap: 20px;
+
+    .group {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        input{
+            height: var(--button-height);
+            padding: 20px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+      
+        button{
+            display: grid;
+            place-items: center;
+            width: var(--button-width);
+            height: var(--button-height);
+            border-radius: 10px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+    }
+    
+  }
+
+   
+    button {
+      display: grid;
+      place-items: center;
+      width: var(--button-width);
+      height: 35px;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    
+  
+}

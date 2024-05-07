@@ -1,23 +1,30 @@
-import { Reaction, Message } from '@/libs/types'
+import { Reaction, MessageData } from '@/libs/types'
 import { chatService } from '@/services/chatService';
 import { useReactionsStore } from '@/stores/reactionStore';
 import React from 'react';
 import "./reaction-menu-button.css";
-import { useUserStore } from '@/stores/userStore';
 import { ReactionIcon } from '../reaction-icon/reaction-icon';
+import { useCurrentUser } from '@/stores/userStore';
 
-const ReactionMenuButton = ({ message }: { message: Message }) => {
+const ReactionMenuButton = ({ message }: { message: MessageData }) => {
+    const currentUser = useCurrentUser();
+    if (!currentUser) return <></>;
+
     const {reactions} = useReactionsStore();
-    const { currentUser} = useUserStore();
+
     const reactionArray: Reaction[] = [];
     reactions.forEach((reaction) => reactionArray.push(reaction));
     const firstReactionId =  reactions.entries().next().value[1].id;
+    const currentMessageDetail = message.messageDetails.find(md => md.userId === currentUser?.id);
     
-    const handleSendReaction = (message: Message, reactionId: number) => {
-      chatService.updateReactionMessage(message.id, message.reactionId == reactionId ? null : reactionId);
+    const handleSendReaction = (message: MessageData, reactionId: string | undefined) => {
+      if (currentMessageDetail && currentMessageDetail.reactionId === reactionId){
+        reactionId = undefined;
+      }
+      chatService.updateReactionMessage(message.id, reactionId);
     }
   return (
-    <div className={`reaction-menu-bar-btn ${!!message.reactionId ? 'reaction-show' : ''}`}>
+    <div className={`reaction-menu-bar-btn ${!!currentMessageDetail?.reactionId ? 'reaction-show' : ''}`}>
        <button onClick={() => handleSendReaction(message, firstReactionId)}>
         <ReactionIcon id={undefined}/>
        </button>

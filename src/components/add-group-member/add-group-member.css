@@ -1,0 +1,79 @@
+.add-group-member{
+    --button-width: 100px;
+    --button-height: 50px;
+    width: 600px;
+    height: clamp(300px, 40vh + 5rem ,800px);
+    padding: 30px;
+    background-color: rgba(17, 25, 40, 0.781);
+    border-radius: 10px;
+   
+  
+    form{
+      display: flex;
+      gap: 20px;
+  
+      input{
+        height: var(--button-height);
+        padding: 20px;
+        border-radius: 10px;
+        border: none;
+        outline: none;
+        width: 100%;
+      }
+  
+      button{
+        display: grid;
+        place-items: center;
+        width: var(--button-width);
+        height: var(--button-height);
+        border-radius: 10px;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+    }
+  
+    .user{
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      /* background-color: rgba(17, 25, 40, 0.381); */
+      padding: 10px;
+      .detail{
+        display: flex;
+        align-items: center;
+        gap: 20px;
+  
+        img{
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+      }
+      .group-btn {
+        display: flex;
+      }
+      .left-btn {
+        border-radius: 9999px 0 0 9999px;
+        background-color: hsla(130, 70%, 41%, 0.623);
+      }
+      .right-btn {
+        border-radius: 0 9999px 9999px 0;
+        background-color:  hsla(30, 100%, 50%, 1);
+      }
+      button {
+        display: grid;
+        place-items: center;
+        width: var(--button-width);
+        height: 35px;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+     
+    }
+  }

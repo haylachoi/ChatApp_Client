@@ -3,8 +3,7 @@ import "./login.css";
 import { toast } from "react-toastify";
 import React from "react";
 import { authService, setToken } from "../../services/authService";
-import { useUserStore } from "../../stores/userStore";
-import { fileService } from "@/services/fileService";
+import { useUserActions } from "@/stores/userStore";
 
 
 
@@ -17,7 +16,7 @@ const Login = () => {
     url: "",
   });
 
-  const {setIsLogin} = useUserStore();
+  const {setIsLogin} = useUserActions();
   const [loading, setLoading] = useState(false);
 
   const handleAvatar = (e: ChangeEvent<HTMLInputElement>) => {

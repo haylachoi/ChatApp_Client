@@ -5,49 +5,50 @@ import {
   useEffect,
   useRef,
   useState,
-} from 'react'
-import './chat.css'
-import EmojiPicker from 'emoji-picker-react'
+} from 'react';
+import './chat.css';
+import EmojiPicker from 'emoji-picker-react';
 
-import { useUserStore } from '@/stores/userStore'
-
-import { format } from 'timeago.js'
-import React from 'react'
-import { useRoomStore } from '@/stores/roomStore'
-import { chatService } from '@/services/chatService'
-import { roomService } from '@/services/roomService'
-import useDebounce from '@/hooks/useDebouce'
-import { useReactionsStore } from '@/stores/reactionStore'
-import Message from './message/message'
-import { PrivateRoom } from '@/libs/types'
+import { format } from 'timeago.js';
+import React from 'react';
+import { chatService } from '@/services/chatService';
+import { roomService } from '@/services/roomService';
+import useDebounce from '@/hooks/useDebouce';
+import { useReactionsStore } from '@/stores/reactionStore';
+import Message from './message/message';
+import { Room } from '@/libs/types';
+import { useCurrentUser } from '@/stores/userStore';
+import { useCurrentRoom, useRoomActions } from '@/stores/roomStore';
+import Heading from './heading/heading';
 
 const Chat = () => {
-  const [open, setOpen] = useState(false)
-  const [text, setText] = useState('')
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
   const [img, setImg] = useState<{
-    file: File | undefined,
-    url: string | undefined
-  }>()
+    file: File | undefined;
+    url: string | undefined;
+  }>();
 
-  const [isInview, setIsInview] = useState(true)
+  const [isInview, setIsInview] = useState(true);
 
   const [isFetchingPreviousMessage, setIsFetchingPreviousMessage] =
-    useState(false)
-  const [isFetchingNextMessage, setIsFetchingNextMessage] = useState(false)
+    useState(false);
+  const [isFetchingNextMessage, setIsFetchingNextMessage] = useState(false);
 
-  const { currentUser } = useUserStore()
+  const currentUser = useCurrentUser();
+  const currentRoom = useCurrentRoom();
+
   const {
-    currentRoom,
     addMesageToRoom,
     replaceChats,
     updateFirstMessageId,
     addPreviousMesasges,
     addNextMesasges,
-    updateLastMessage: updateLastMessageId,
-  } = useRoomStore()
+    updateLastMessage,
+  } = useRoomActions();
 
-  const { reactions } = useReactionsStore()
-  
+  const { reactions } = useReactionsStore();
+
   const chatViewportRef = useRef<HTMLDivElement | null>(null);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const firstUnseenMessageRef = useRef<HTMLDivElement | null>(null);
@@ -57,17 +58,16 @@ const Chat = () => {
   const [isGoToUnseenMessage, setIsGoToUnseenMessage] = useState(false);
   const isReceiverBlocked = false;
   const isCurrentUserBlocked = false;
-  
-  if (!currentRoom) {
-    return null;;
+
+  if (!currentRoom || !currentUser) {
+    return <></>;
   }
-  
   const canFetchPreviewMessage =
     currentRoom.chats == undefined ||
     currentRoom.firstMessageId == undefined ||
     currentRoom.chats.length == 0
       ? undefined
-      : +currentRoom.chats[0].id > +currentRoom.firstMessageId
+      : +currentRoom.chats[0].id > +currentRoom.firstMessageId;
 
   const canFetchNextMessage =
     currentRoom.chats == undefined ||
@@ -75,67 +75,73 @@ const Chat = () => {
     currentRoom.chats.length == 0
       ? undefined
       : +currentRoom.chats[currentRoom.chats.length - 1].id <
-        +currentRoom.lastMessageId
+        +currentRoom.lastMessageId;
   const handleEmoji = (e: any) => {
-    setText((prev) => prev + e.emoji)
-    setOpen(false)
-  }
+    setText((prev) => prev + e.emoji);
+    setOpen(false);
+  };
 
-  const handleImg: React.ChangeEventHandler<HTMLInputElement> | undefined = (e) => {
+  const handleImg: React.ChangeEventHandler<HTMLInputElement> | undefined = (
+    e,
+  ) => {
     const element = e.currentTarget;
     const files = e.currentTarget.files;
-    if (!files) return;   
+    if (!files) return;
 
-    chatService.sendImageMessage(files, currentRoom.id).then((result) => {
-
-    }).catch((error: any) => {
-      console.log(error)
-    })
-  }
+    chatService
+      .sendImageMessage(files, currentRoom.id)
+      .then((result) => {})
+      .catch((error: any) => {
+        console.log(error);
+      });
+  };
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> | undefined = (
     e,
   ) => {
     if (e.key == 'Enter') {
-      handleSend()
+      handleSend();
     }
-  }
+  };
 
   const handleGoToLast = () => {
+    if (!currentRoom.chats || currentRoom.chats.length === 0) {
+      return;
+    }
     roomService
-      .getNextPrivateMessages(
-        currentRoom.id!,
-        currentRoom.chats[currentRoom.chats.length - 1].id!,
+      .getNextMessages(
+        currentRoom.id,
+        currentRoom.chats[currentRoom.chats.length - 1].id,
         null,
       )
       .then((result) => {
-        console.log(result)
+        console.log(result);
       })
-      .catch((error) => {})
-  }
+      .catch((error) => {});
+  };
 
   const handleSend = async () => {
-    if (text === '') return
-    if (!currentRoom.friend?.id) return
-    let imgUrl = null
+    if (text === '') return;
+    let imgUrl = null;
 
     try {
-      await chatService.sendPrivateMessage(currentRoom.friend.id, text)
+      await chatService.sendMessage(currentRoom.id, text);
     } catch (err) {
-      console.log(err)
+      console.log(err);
     } finally {
-      setImg(undefined)
+      setImg(undefined);
 
-      setText('')
+      setText('');
     }
-  }
+  };
   const handleScroll: UIEventHandler<HTMLDivElement> | undefined = (e) => {
-    const element = e.currentTarget
-    let a = element.scrollTop
-    let b = element.scrollHeight - element.clientHeight
-    let c = a / b // c=0 => top top page, c =1 => end of page
+    if (!currentRoom.chats || currentRoom.chats.length === 0) return;
+    const element = e.currentTarget;
+    let a = element.scrollTop;
+    let b = element.scrollHeight - element.clientHeight;
+    let c = a / b; // c=0 => top top page, c =1 => end of page
 
-    const isScrollDown = element.scrollTop > scrollTop
+    const isScrollDown = element.scrollTop > scrollTop;
 
     if (
       a < 200 &&
@@ -143,18 +149,18 @@ const Chat = () => {
       !isFetchingPreviousMessage &&
       !isScrollDown
     ) {
-      setIsFetchingPreviousMessage(true)
+      setIsFetchingPreviousMessage(true);
       roomService
-        .getPreviousPrivateMessages(currentRoom.id!, currentRoom.chats[0].id!)
+        .getPreviousMessages(currentRoom.id, currentRoom.chats[0].id)
         .then((result) => {
-          addPreviousMesasges(currentRoom.id!, result.data)
+          addPreviousMesasges(currentRoom.id, result.data);
         })
         .catch((error) => {})
         .finally(() => {
           setTimeout(() => {
-            setIsFetchingPreviousMessage(false)
-          }, 100)
-        })
+            setIsFetchingPreviousMessage(false);
+          }, 100);
+        });
     }
     if (
       a > b - 200 &&
@@ -162,157 +168,145 @@ const Chat = () => {
       !isFetchingNextMessage &&
       isScrollDown
     ) {
-      setIsFetchingNextMessage(true)
+      setIsFetchingNextMessage(true);
       roomService
-        .getNextPrivateMessages(
-          currentRoom.id!,
-          currentRoom.chats[currentRoom.chats.length - 1].id!,
+        .getNextMessages(
+          currentRoom.id,
+          currentRoom.chats[currentRoom.chats.length - 1].id,
         )
         .then((result) => {
-          addNextMesasges(currentRoom.id!, result.data)
+          addNextMesasges(currentRoom.id, result.data);
         })
         .catch((error) => {
-          console.log(error)
+          console.log(error);
         })
         .finally(() => {
           setTimeout(() => {
             // setIsFetchingPreviousMessage(false);
-            setIsFetchingNextMessage(false)
-          }, 100)
-        })
+            setIsFetchingNextMessage(false);
+          }, 100);
+        });
     }
 
-    setScrollTop(element.scrollTop)
-  }
+    setScrollTop(element.scrollTop);
+  };
 
   useEffect(() => {
     const initChat = async () => {
-     
-
-      if ( currentRoom.firstMessageId === undefined) {     
-        const result = await roomService.getFirstMessage(currentRoom.id);
-        const message = result.data
-        if (message) {
-          updateFirstMessageId(currentRoom.id, message.id)
+      try {
+        // update first message id
+        if (currentRoom.firstMessageId === undefined) {
+          const result = await roomService.getFirstMessage(currentRoom.id);
+          const message = result.data;
+          if (message) {
+            updateFirstMessageId(currentRoom.id, message.id);
+          }
         }
-      }
+        // load some message
+        if (currentRoom.id && !currentRoom.chats) {
+          const result = await roomService.getSomeMessages(currentRoom.id);
+          console.log('start', result, currentRoom.id);
+          const messages = result.data;
+          replaceChats(currentRoom.id, messages);
+        }
 
-      if (currentRoom.id && currentRoom.chats.length < 1) {
-        const result = await roomService.getSomePrivateMessages(currentRoom.id)
-        const messages = result.data;
-        replaceChats(currentRoom.id, messages)
+        if (currentRoom.currentRoomMemberInfo.firstUnseenMessageId) {
+          firstUnseenMessageRef.current?.scrollIntoView({
+            behavior: 'instant',
+            block: 'center',
+            inline: 'nearest',
+          });
+        } else if (lastMessageRef.current) {
+          lastMessageRef.current.scrollIntoView({ behavior: 'instant' });
+        }
+      } catch (error) {
+        console.log(error);
       }
-      
-      if (currentRoom.firstUnseenMessageId) {
-        firstUnseenMessageRef.current?.scrollIntoView({
-          behavior: 'instant',
-          block: 'center',
-          inline: 'nearest',
-        })
-      } else if (lastMessageRef.current) {
-        lastMessageRef.current.scrollIntoView({ behavior: 'instant' })
-      }
-    }
-    initChat()
-  }, [currentRoom])
+    };
+    initChat();
+  }, [currentRoom]);
 
   useEffect(() => {
     const key = chatService.onReceiveMessage.sub((message) => {
-      console.log(message)
-      if (message.privateRoomId == currentRoom.id) {
-        addMesageToRoom(message.privateRoomId, message)
+      if (message.roomId == currentRoom.id) {
+        addMesageToRoom(message.roomId, message);
         if (message.senderId == currentUser?.id) {
-          lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' })
+          lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
       }
-    })
+    });
 
     return () => {
-      chatService.onReceiveMessage.unsub(key)
-    }
-  }, [currentRoom])
+      chatService.onReceiveMessage.unsub(key);
+    };
+  }, [currentRoom]);
 
   /// observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsInview(entry.isIntersecting)
+        setIsInview(entry.isIntersecting);
       },
       {
         root: chatViewportRef.current, // viewport
         rootMargin: '0px', // no margin
         threshold: 0.5, // 50% of target visible
       },
-    )
+    );
 
     if (lastMessageRef.current) {
-      observer.observe(lastMessageRef.current)
+      observer.observe(lastMessageRef.current);
     }
 
     return () => {
       if (lastMessageRef.current) {
-        observer.unobserve(lastMessageRef.current)
+        observer.unobserve(lastMessageRef.current);
       }
-    }
-  }, [currentRoom.chats.length])
+    };
+  }, [currentRoom.chats?.length]);
 
   /// observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const element = entry.target as HTMLElement
-          const id = element.dataset?.id
+          const element = entry.target as HTMLElement;
+          const id = element.dataset?.id;
           if (id !== undefined && entry.isIntersecting) {
             chatService
-              .updateSeenMessage(id)
+              .updateIsReaded(id)
               .then((result) => {
-                observer.unobserve(entry.target)
+                observer.unobserve(entry.target);
               })
-              .catch()
+              .catch();
           }
-        })
+        });
       },
       {
         root: chatViewportRef.current, // viewport
         rootMargin: '0px', // no margin
         threshold: 0.5, // 50% of target visible
       },
-    )
+    );
 
     messagesRef.current?.map((el) => {
       if (el) {
-        observer.observe(el)
+        observer.observe(el);
       }
-    })
+    });
 
     // Clean up the observer
     return () => {
       messagesRef.current?.map((el) => {
         if (el) {
-          observer.unobserve(el)
+          observer.unobserve(el);
         }
-      })
-    }
-  }, [currentRoom.chats.length])
-
-
+      });
+    };
+  }, [currentRoom.chats?.length]);
   return (
     <div className="chat">
-      <div className="top">
-        <div className="user">
-          <img src={currentRoom.friend?.avatar || './avatar.png'} alt="" />
-          <div className="texts">
-            <span>{currentRoom.friend?.fullname}</span>
-            <p>Lorem ipsum dolor, sit amet.</p>
-          </div>
-        </div>
-        <div className="icons">
-          <img src="./phone.png" alt="" />
-          <img src="./video.png" alt="" />
-          <img src="./info.png" alt="" />
-        </div>
-      </div>
+     <Heading/>
       <div className="center" onScroll={handleScroll} ref={chatViewportRef}>
         {currentRoom.chats &&
           currentRoom.chats.map((message, index) => (
@@ -377,9 +371,10 @@ const Chat = () => {
           disabled={isCurrentUserBlocked || isReceiverBlocked}>
           Send
         </button>
+        ,
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Chat
+export default Chat;

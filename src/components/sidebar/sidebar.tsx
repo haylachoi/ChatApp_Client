@@ -1,9 +1,9 @@
 import React from "react"
-import "./list.css"
+import "./sidebar.css"
 import Userinfo from "../userInfo/userinfo"
 import ChatList from "../chatList/chatList"
 
-const List = () => {
+const Sidebar = () => {
   return (
     <div className='list'>
       <Userinfo/>
@@ -12,4 +12,4 @@ const List = () => {
   )
 }
 
-export default List
+export default Sidebar

@@ -6,7 +6,7 @@ interface ModalProps {
   isOpen: boolean
   hasCloseBtn?: boolean
   onClose: () => void
-  children: React.ReactNode
+  children: React.ReactNode | undefined;
 }
 const Modal: React.FC<ModalProps> = ({
   isOpen,

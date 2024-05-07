@@ -1,10 +1,10 @@
+import { useCurrentUser } from "@/stores/userStore";
 import "./userInfo.css"
-import { useUserStore } from "../../../stores/userStore";
 import React from "react";
 
 const Userinfo = () => {
 
-  const { currentUser } = useUserStore();
+  const  currentUser  = useCurrentUser();
 
   return (
     <div className='userInfo'>

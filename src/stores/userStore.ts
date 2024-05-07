@@ -4,14 +4,22 @@ import { create } from "zustand";
 
 interface useUserStoreProps {
   isLogin: boolean;
-  setIsLogin: (isLogin: boolean) => void;
   currentUser: User | undefined;
+
+  setIsLogin: (isLogin: boolean) => void;
   setCurrentUser: (currentUser: User) => void;
 }
 
-export const useUserStore = create<useUserStoreProps>((set) => ({
+const useUserStore = create<useUserStoreProps>()((set) => ({
   isLogin: false,
-  setIsLogin: (isLogin) => set({isLogin}),
   currentUser: undefined,
+
+  setIsLogin: (isLogin) => set({isLogin}),
   setCurrentUser: (currentUser) => set({currentUser})
 }));
+
+
+export const useIsLogin = () =>  useUserStore(state => state.isLogin);
+export const useCurrentUser = () => useUserStore(state => state.currentUser);
+
+export const useUserActions = () => useUserStore(state => ({setIsLogin: state.setIsLogin, setCurrentUser: state.setCurrentUser}));

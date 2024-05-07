@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import { RawRoom, Room } from './types';
 
 export const generatePublisher= <T> (subscriber: Map<string, T>) => {
     return {
@@ -11,6 +12,20 @@ export const generatePublisher= <T> (subscriber: Map<string, T>) => {
             subscriber.delete(key)
           },
     }
+}
+
+
+export const convertRawRoomToRoom = (rawRoom: RawRoom, currentId: string) => {
+    const roomMemberInfos = rawRoom.roomMemberInfos;
+    const index = roomMemberInfos.findIndex(info => info.userId === currentId);
+
+    if (index === -1) {
+     return;
+    }
+
+    const myRoomInfo = roomMemberInfos.splice(index,1)[0];
+    const room: Room = {...rawRoom, currentRoomMemberInfo: myRoomInfo, otherRoomMemberInfos: roomMemberInfos, chats: undefined}
+    return room;
 }
 
 

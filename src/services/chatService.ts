@@ -1,17 +1,17 @@
-import { generatePublisher } from '@/libs/utils'
-import { chatConnection } from './hubConnection'
-import { Message, PrivateRoom } from '@/libs/types'
-import { REST_SEGMENT } from '@/libs/constant'
-import { getAccessToken } from './authService'
+import { generatePublisher } from '@/libs/utils';
+import { chatConnection } from './hubConnection';
+import { MessageData, MessageDetail, RawRoom } from '@/libs/types';
+import { REST_SEGMENT } from '@/libs/constant';
+import { getAccessToken } from './authService';
 
 const subscribers = {
-  receiveMessage: new Map<string, (message: Message) => void>(),
+  receiveMessage: new Map<string, (message: MessageData) => void>(),
   updateSeenMessage: new Map<
     string,
-    (message: Message, privateRoom: PrivateRoom) => void
+    (message: MessageDetail, room: RawRoom) => void
   >(),
-  updateReactionMessage: new Map<string, (message: Message) => void>(),
-}
+  updateReactionMessage: new Map<string, (roomId: string, messageDetail: MessageDetail) => void>(),
+};
 
 const sendImageMessage = async (files: FileList, roomId: string) => {
   const pathname = `${REST_SEGMENT.CHAT}`;
@@ -25,56 +25,56 @@ const sendImageMessage = async (files: FileList, roomId: string) => {
     method: 'POST',
     body: formData,
     headers: {
-        "authorization": `Bearer ${getAccessToken()}`
-    }
-  })
-}
+      authorization: `Bearer ${getAccessToken()}`,
+    },
+  });
+};
 
-const sendPrivateMessage = async (id: string, message: string) => {
-  return chatConnection.send('SendPrivateMessage', id, message)
-}
+const sendMessage = async (roomId: string, message: string) => {
+  return chatConnection.send('SendMessage', roomId, message);
+};
 
-const updateSeenMessage = async (id: string) => {
-  return chatConnection.send('UpdateSeenMessage', id)
-}
+const updateIsReaded = async (messageId: string) => {
+  return chatConnection.send('UpdateIsReaded', messageId);
+};
 
 const updateReactionMessage = async (
   messageId: string,
-  reactionId: number | null,
+  reactionId: string | undefined,
 ) => {
-  return chatConnection.send('updateReactionMessage', messageId, reactionId)
-}
+  return chatConnection.send('updateReactionMessage', messageId, reactionId);
+};
 
 const onUpdateReactionMessage = generatePublisher(
   subscribers.updateReactionMessage,
-)
-const onReceiveMessage = generatePublisher(subscribers.receiveMessage)
-const onUpdateSeenMessage = generatePublisher(subscribers.updateSeenMessage)
+);
+const onReceiveMessage = generatePublisher(subscribers.receiveMessage);
+const onUpdateIsReaded = generatePublisher(subscribers.updateSeenMessage);
 
-chatConnection.on('ReceivePrivateMessage', (message) => {
+chatConnection.on('ReceiveMessage', (message: MessageData) => {
   subscribers.receiveMessage.forEach((eventHandler) => {
-    eventHandler(message)
-  })
-})
+    eventHandler( message);
+  });
+});
 
-chatConnection.on('UpdateSeenMessage', (message, privateRoom) => {
+chatConnection.on('UpdateIsReaded', (messageDetail: MessageDetail, rawRoom: RawRoom) => {
   subscribers.updateSeenMessage.forEach((eventHandler) => {
-    eventHandler(message, privateRoom)
-  })
-})
+    eventHandler(messageDetail, rawRoom);
+  });
+});
 
-chatConnection.on('UpdateReactionMessage', (message) => {
+chatConnection.on('UpdateReactionMessage', (roomId: string, messageDetail: MessageDetail) => {
   subscribers.updateReactionMessage.forEach((eventHandler) => {
-    eventHandler(message)
-  })
-})
+    eventHandler(roomId, messageDetail);
+  });
+});
 
 export const chatService = {
-  sendPrivateMessage,
+  sendMessage,
   sendImageMessage,
   onReceiveMessage,
-  updateSeenMessage,
-  onUpdateSeenMessage,
+  updateIsReaded,
+  onUpdateIsReaded,
   updateReactionMessage,
   onUpdateReactionMessage,
-}
+};

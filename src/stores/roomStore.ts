@@ -1,38 +1,126 @@
-import { Message, PrivateRoom } from "@/libs/types";
+import { MessageData, MessageDetail, Room, User } from "@/libs/types";
+import { roomService } from "@/services/roomService";
 import { create } from "zustand";
 
 
 interface useRoomStoreProps {
-  currentRoom: PrivateRoom | undefined;
-  setCurrentRoom: (currentRoom: PrivateRoom) => void;
-  roomChats: PrivateRoom[];
-  setRoomChats: (roomChats: PrivateRoom[]) => void;
-  addRoomChat: (roomChat: PrivateRoom) => void;
-  replaceChats: (roomId: string, chats: Message[]) =>void;
+  currentRoom: Room | undefined;
+  roomChats: Room[];
+  roomMembers: User[];
 
-  updateCanMessageDisplay: (roomId: string,canDisplay: boolean) => void;
-  updateReactionMessage:(message: Message) => void;
-  updateLastMessage: (roomId: string, message: Message) => void;
+  setCurrentRoom: (currentRoom: Room) => void;
+  setRoomChats: (roomChats: Room[]) => void;
+  fetchRoomChats: (currentUserId: string) => void;
+  addRoomChat: (roomChat: Room) => void;
+  replaceChats: (roomId: string, chats: MessageData[]) =>void;
+  
+  updateSeenMessage: (room: Room, messageDetail: MessageDetail) => void;
+  updateReactionMessage:(roomId: string, messageDetail: MessageDetail) => void;
+  
+  updateCanDisplayRoom: (roomId: string,canDisplay: boolean) => void;
   updateFirstMessageId: (roomId: string, messageId: string) => void;
-  addMesageToRoom: (roomId: string, message: Message) => void;
-  updateSeenMessage: (roomId: string, message: Message, privateRoom: PrivateRoom | undefined) => void;
-  addPreviousMesasges: (roomId: string, chats: Message[]) =>void;
-  addNextMesasges: (roomId: string, chats: Message[]) =>void;
+  updateLastMessage: (roomId: string, message: MessageData) => void;
+
+  addMesageToRoom: (roomId: string, message: MessageData) => void;
+  addPreviousMesasges: (roomId: string, chats: MessageData[]) =>void;
+  addNextMesasges: (roomId: string, chats: MessageData[]) =>void;
 }
 
-export const useRoomStore = create<useRoomStoreProps>((set) => ({
-  currentRoom: undefined,
+const useRoomStore = create<useRoomStoreProps>()((set) => ({
+  currentRoom: undefined, 
   setCurrentRoom: (currentRoom) => set({currentRoom}),
+  fetchRoomChats: async (currentUserId) => { 
+    try {
+      const roomChats = await roomService.getRooms(currentUserId);
+      console.log(roomChats);
+         
+      set({roomChats})
+    } catch (error) {
+      console.log(error);
+    }
+  },
   roomChats: [],
+  roomMembers: [],
   setRoomChats: (roomChats) => set({roomChats}),
   addRoomChat: (roomchat) => set((state) => ({ roomChats: [...state.roomChats, roomchat]})),
   replaceChats: (roomId, chats) => set((state) => {
+      let room = state.roomChats.find(room => room.id == roomId);
+      if (!room) return state;
+      
+      room.chats= chats;
+      return {...state, roomChats: [...state.roomChats]}
+  }),
+
+
+  updateCanDisplayRoom: (roomId, canDisplay) => set((state) => {
     let room = state.roomChats.find(room => room.id == roomId);
-    room!.chats= chats;
+    if (!room) return state;
+
+    room.currentRoomMemberInfo.canDisplayRoom = canDisplay;
+    return {...state, roomChats: [...state.roomChats]}
+  }),
+  updateReactionMessage: (roomId, newMessageDetail) => set((state) => {
+    const room = state.roomChats.find(room => room.id == roomId);
+    if (!room || !room.chats) return state;
+  
+    const message = room.chats.find(m => m.id == newMessageDetail.messageId);
+    if (!message) {
+      return state;
+    }
+    var messageDetail = message.messageDetails.find(md => md.id == newMessageDetail.id);
+    if (!messageDetail) {
+      message.messageDetails.push(newMessageDetail);
+    } else {
+      messageDetail.reactionId = newMessageDetail.reactionId;
+    }
     return {...state, roomChats: [...state.roomChats]}
   }),
   
-  
+  updateFirstMessageId: (roomId, messageId) => set((state) => {
+    let room = state.roomChats.find(room => room.id == roomId);
+    if (!room) return state;
+
+    room.firstMessageId = messageId;
+    return {...state, roomChats: [...state.roomChats]}
+  }),
+
+  updateLastMessage: (roomId, message) => set((state) => {
+    let room = state.roomChats.find(room => room.id == roomId);
+    if (!room) return state;
+   
+    room.currentRoomMemberInfo.previousLastMessageId = room.lastMessageId;
+    room.lastMessageId = message.id;
+    
+    const currentUserId = room.currentRoomMemberInfo.userId;
+    if(!message.messageDetails.find(md => md.userId === currentUserId)&& message.senderId !== currentUserId){  
+      room.currentRoomMemberInfo.lastUnseenMessage = message;
+      room.currentRoomMemberInfo.unseenMessageCount= room.currentRoomMemberInfo.unseenMessageCount +1;
+    }
+    return {...state, roomChats: [...state.roomChats]}
+  }),
+  updateSeenMessage: ( newRoom, messageDetail) => set((state) => {
+    let room = state.roomChats.find(r => r.id == newRoom.id);
+    if (!room || !newRoom) return state;
+    room.currentRoomMemberInfo.unseenMessageCount = newRoom.currentRoomMemberInfo.unseenMessageCount;
+    room.currentRoomMemberInfo.lastUnseenMessage = newRoom.currentRoomMemberInfo.lastUnseenMessage;    
+    room.currentRoomMemberInfo.firstUnseenMessageId = newRoom.currentRoomMemberInfo.firstUnseenMessageId;
+    
+    let message = room.chats?.find(m => m.id == messageDetail.messageId);
+    if (!message) return {roomChats: [...state.roomChats]};
+
+    if (!message.messageDetails.find(md => md.messageId == messageDetail.messageId && md.userId === messageDetail.userId)){
+      message.messageDetails.push(messageDetail);   
+    }
+    return {roomChats: [...state.roomChats]};
+  }),
+  addMesageToRoom: (roomId, message) => set((state) => {
+    let room = state.roomChats.find(r => r.id == roomId);
+    if (!room || !room.chats) return state;
+
+    room.chats.push(message);
+    room.lastMessageId = message.id;
+    return {roomChats: [...state.roomChats]}
+  }),
   addPreviousMesasges: (roomId, messages) => set((state) => {
     let room = state.roomChats.find(room => room.id == roomId);
     if (!room) return state;
@@ -45,80 +133,32 @@ export const useRoomStore = create<useRoomStoreProps>((set) => ({
     let room = state.roomChats.find(room => room.id == roomId);
     if (!room) return state;
 
-    if (!room?.chats) room!.chats =messages;
+    if (!room.chats) room!.chats =messages;
       else room!.chats = [...room?.chats, ...messages];
 
     return {...state, roomChats: [...state.roomChats]}
   }),
-
-  updateCanMessageDisplay: (roomId, canDisplay) => set((state) => {
-    let room = state.roomChats.find(room => room.id == roomId);
-    if (!room) return state;
-
-    room!.canRoomDisplay = canDisplay;
-    return {...state, roomChats: [...state.roomChats]}
-  }),
-
-  updateReactionMessage: (newMessage) => set((state) => {
-    const room = state.roomChats.find(room => room.id == newMessage.privateRoomId);
-    if (!room) return state;
-
-    
-    const message = room.chats.find(m => m.id == newMessage.id);
-    if (message == undefined) {
-      return state;
-    }
-    message.reactionId = newMessage.reactionId;
-    return {...state, roomChats: [...state.roomChats]}
-  }),
-  updateLastMessage: (roomId, message) => set((state) => {
-    let room = state.roomChats.find(room => room.id == roomId);
-    if (!room) {
-      return state;
-    }
-    room!.previousLastMessageId = room?.lastMessageId;
-    room!.lastMessageId = message.id;
-    if(!message.isReaded && message.senderId == room?.friend.id){
-      room!.lastUnseenMessage = message;
-      room!.unseenMessageCount = room.unseenMessageCount! +1;
-    }
-    return {...state, roomChats: [...state.roomChats]}
-  }),
-  updateFirstMessageId: (roomId, messageId) => set((state) => {
-    let room = state.roomChats.find(room => room.id == roomId);
-    if (!room) return state;
-
-    room!.firstMessageId = messageId;
-    return {...state, roomChats: [...state.roomChats]}
-  }),
-  addMesageToRoom: (roomId, message) => set((state) => {
-    let room = state.roomChats.find(r => r.id == roomId);
-    if (!room) return state;
-
-    room.chats.push(message);
-    room.lastMessageId = message.id;
-    return {roomChats: [...state.roomChats]}
-  }),
-  updateSeenMessage: (roomId, message, privateRoom) => set((state) => {
-    let room = state.roomChats.find(r => r.id == roomId);
-    if (!room) return state;
-
-    // room.unseenMessageCount = room.unseenMessageCount! -1;
-    // if(room.firstUnseenMessageId < message.id){
-    //   room.firstUnseenMessageId = message.id;
-    // }
-    if (privateRoom) {
-      room.unseenMessageCount = privateRoom.unseenMessageCount;
-      room.lastUnseenMessage = privateRoom.lastUnseenMessage;    
-      room.firstUnseenMessageId = privateRoom.firstUnseenMessageId;
-    }
-
-    let messageInRoom = room.chats.find(c => c.id == message.id);
-    if (messageInRoom == undefined) {
-      return state;
-    }
-    messageInRoom.isReaded = true;
-
-    return {roomChats: [...state.roomChats]};
-  })
 }));
+
+export const useRoomChats = () => useRoomStore(state => state.roomChats);
+export const useCurrentRoom = () =>  useRoomStore((state) => state.currentRoom);
+export const useCurrentChats = () => useRoomStore((state) => state.currentRoom?.chats);
+export const useRoomMembers = () => useRoomStore((state) => state.roomMembers);
+
+export const useRoomActions = () =>  useRoomStore(state => ({
+  setCurrentRoom: state.setCurrentRoom,
+  setRoomChats: state.setRoomChats,
+  fetchRoomChats: state.fetchRoomChats,
+  addRoomChat: state.addRoomChat,
+  replaceChats: state.replaceChats,
+  
+  updateCanDisplayRoom: state.updateCanDisplayRoom,
+  updateReactionMessage: state.updateReactionMessage,
+  updateFirstMessageId: state.updateFirstMessageId,
+  updateLastMessage: state.updateLastMessage,
+
+  updateSeenMessage: state.updateSeenMessage,
+  addMesageToRoom: state.addMesageToRoom,
+  addPreviousMesasges: state.addPreviousMesasges,
+  addNextMesasges: state.addNextMesasges,
+}))

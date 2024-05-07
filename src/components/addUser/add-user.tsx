@@ -1,16 +1,16 @@
-import "./addUser.css";
+import "./add-user.css";
 
 import { FormEvent, useState } from "react";
 import React from "react";
 import { userService } from "@/services/userService";
-import { useUserStore } from "@/stores/userStore";
 import { roomService } from "@/services/roomService";
 import { User } from "@/libs/types";
+import { useCurrentUser } from "@/stores/userStore";
 
 const AddUser = () => {
   const [users, setUsers] = useState<User[]>([]);
 
-  const { currentUser } = useUserStore();
+  const currentUser = useCurrentUser();
 
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,7 +30,7 @@ const AddUser = () => {
 
   const handleAdd = async (id: string) => {
     try {
-      const result = await roomService.createPrivateRoom(id)
+      const result = await roomService.createRoom(id)
       console.log("add room",result);
     } catch (err) {
       console.log(err);

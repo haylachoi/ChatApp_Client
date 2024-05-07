@@ -7,4 +7,5 @@ export const REST_SEGMENT = {
     AUTH: `${BASE_REST_URL}/auth`,
     FILE: `${BASE_REST_URL}/file`,
     CHAT: `${BASE_REST_URL}/chat`,
+    GROUP: `${BASE_REST_URL}/group`,
 }

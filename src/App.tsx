@@ -1,19 +1,21 @@
-import { useEffect, useState } from 'react'
-import React from 'react'
-import Login from './pages/login/login'
-import { authService } from './services/authService'
-import { useUserStore } from './stores/userStore'
+import { useEffect, useState } from 'react';
+import React from 'react';
+
+import Login from './pages/login/login';
+import Main from './pages/main/main';
+import { authService } from './services/authService';
 import {
   chatConnection,
-  privateRoomConnection,
+  roomConnection,
   userConnection,
-} from './services/hubConnection'
-import Main from './pages/main/main'
+} from './services/hubConnection';
+import { useIsLogin, useUserActions } from './stores/userStore';
 
 const App = () => {
-  const [isFetching, setIsFetching] = useState(false)
-  const { isLogin, setIsLogin, setCurrentUser, currentUser } = useUserStore()
-  const [isConnected, setIsConnected] = useState(false)
+  const [isFetching, setIsFetching] = useState(false);
+  const isLogin = useIsLogin();
+  const { setIsLogin, setCurrentUser } = useUserActions();
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const start = async () => {
@@ -43,7 +45,7 @@ const App = () => {
           await chatConnection.start()
           await Promise.all([
             userConnection.start(),
-            privateRoomConnection.start(),
+            roomConnection.start(),
           ])
           setIsConnected(true)
         } catch (error) {}

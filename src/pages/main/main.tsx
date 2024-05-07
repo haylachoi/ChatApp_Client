@@ -1,40 +1,52 @@
-import Chat from '@/components/ui/chat/chat'
-import List from '@/components/ui/sidebar/list'
+import Sidebar from '@/components/sidebar/sidebar'
 import { Reaction } from '@/libs/types'
 import { chatService } from '@/services/chatService'
 import { userService } from '@/services/userService'
 import { useReactionsStore } from '@/stores/reactionStore'
-import { useRoomStore } from '@/stores/roomStore'
 import { LucideIcon, ThumbsDown, ThumbsUp } from 'lucide-react'
 import React, { useEffect } from 'react'
 import "./main.css";
 import { roomService } from '@/services/roomService'
+import { useCurrentRoom, useRoomActions, useRoomChats } from '@/stores/roomStore'
+import { useCurrentUser } from '@/stores/userStore'
+import { convertRawRoomToRoom } from '@/libs/utils'
+import Chat from '@/components/chat/chat'
+import AppModal from '@/components/app-modal/app-modal'
 
 const Main = () => {
-  const { currentRoom, roomChats, updateSeenMessage, updateLastMessage, addMesageToRoom , updateReactionMessage, updateCanMessageDisplay} =
-    useRoomStore();
+  const currentUser = useCurrentUser();
+  if (!currentUser ) return <></>;
+  const currentRoom = useCurrentRoom();
+
+  const roomChats = useRoomChats();
+  const { updateSeenMessage, updateLastMessage, updateReactionMessage, updateCanDisplayRoom} =
+    useRoomActions();
+
   const { setReactions } = useReactionsStore();
   const reactionIconMapping = {
     Like: ThumbsUp,
     Hate: ThumbsDown
   }
   useEffect(() => {
-    const seenMessageEventId = chatService.onUpdateSeenMessage.sub((message, privateRoom) => {
-      updateSeenMessage(message.privateRoomId, message, privateRoom)
+    const seenMessageEventId = chatService.onUpdateIsReaded.sub((messageDetail, rawRoom) => {
+      const room = convertRawRoomToRoom(rawRoom, currentUser.id);
+      console.log(messageDetail, room);
+      if (!room) return;
+      updateSeenMessage(room, messageDetail);
     })
 
     return () => {
-      chatService.onUpdateSeenMessage.unsub(seenMessageEventId)
+      chatService.onUpdateIsReaded.unsub(seenMessageEventId)
     }
   }, [])
 
   useEffect(() => {
-    const reactionMessageEventId = chatService.onUpdateReactionMessage.sub((message) => {
-      updateReactionMessage(message);
+    const reactionMessageEventId = chatService.onUpdateReactionMessage.sub((roomId, messageDetail) => {
+      updateReactionMessage(roomId, messageDetail);
     })
     
     return () => {
-      chatService.onUpdateSeenMessage.unsub(reactionMessageEventId)
+      chatService.onUpdateIsReaded.unsub(reactionMessageEventId)
     }
   }, [])
 
@@ -42,7 +54,7 @@ const Main = () => {
     userService
       .getReactions()
       .then((result) => {
-        const map = new Map<number,Reaction>();
+        const map = new Map<string,Reaction>();
         result.data.forEach((reaction: Reaction) => {
           const name = reaction.name;
           reaction.icon = reactionIconMapping[reaction.name as keyof {Like: LucideIcon, Hate: LucideIcon}];
@@ -52,14 +64,14 @@ const Main = () => {
       })
       .catch((error) => {})
 
-    const key = chatService.onReceiveMessage.sub((message) => {
-      updateLastMessage(message.privateRoomId, message)
-      let room = roomChats.find((room) => room.id == message.privateRoomId);
-      if (room && !room.canRoomDisplay) {
+    const key = chatService.onReceiveMessage.sub((message) => {    
+      updateLastMessage(message.roomId, message)
+      let room = roomChats.find((room) => room.id == message.roomId);
+      if (room && !room.currentRoomMemberInfo.canDisplayRoom) {
         roomService.updateCanMessageDisplay(room.id, true).then((result) => {
           if (result.isSuccess) {
             const roomInfo = result.data;
-            updateCanMessageDisplay(roomInfo.privateRoomId, roomInfo.canRoomDisplay);
+            updateCanDisplayRoom(room.id, roomInfo.canDisplayRoom);
           }
         });
       }
@@ -98,13 +110,14 @@ const Main = () => {
   return (
     <>
      <div className="side-bar">
-      <List />
+      <Sidebar />
      </div>
 
      <div className="main-content">
      {currentRoom && <Chat />}
       {/* <Detail/> */}
      </div>
+     <AppModal/>
     </>
   )
 }

@@ -74,16 +74,6 @@
       border: none;
       cursor: pointer;
     }
-    /* button{
-      display: grid;
-      place-items: center;
-      width: var(--button-width);
-      height: var(--button-height);
-      border-radius: 10px;
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      cursor: pointer;
-    } */
+   
   }
 }

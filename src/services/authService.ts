@@ -15,17 +15,6 @@ const login = (data: {email : string, password: string}) => {
     return response;
 }
 
-// const register = (data: {email : string, password: string, fullname: string}) => {
-//     const url = `${REST_SEGMENT.auth}/register`;
-//     const response = fetch(url, {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json",         
-//           },
-//         body: JSON.stringify(data)
-//     })
-//     return response;
-// }
 
 const register = (formData: FormData) => {
     const url = `${REST_SEGMENT.AUTH}/register`;

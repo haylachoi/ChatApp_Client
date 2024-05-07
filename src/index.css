@@ -31,3 +31,13 @@ body {
   border-radius: 10px;
   background-color: rgba(17, 25, 40, 0.9);
 }
+
+.btn-none {
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  background: transparent;
+}
