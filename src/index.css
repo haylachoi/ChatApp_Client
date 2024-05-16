@@ -36,8 +36,13 @@ body {
   outline: none;
   border: none;
   cursor: pointer;
+  background-color: transparent;
 }
 
-::-webkit-scrollbar {
-  background: transparent;
+:root {
+  --green: hsla(130, 70%, 41%, 0.623);
+  --orange: hsla(30, 100%, 50%, 1);
 }
+/* ::-webkit-scrollbar {
+  background: transparent;
+} */

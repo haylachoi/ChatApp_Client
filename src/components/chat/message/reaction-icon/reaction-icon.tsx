@@ -2,7 +2,7 @@ import { useReactionsStore } from "@/stores/reactionStore";
 import { Ban, LucideIcon } from "lucide-react";
 import React from "react";
 
-export const ReactionIcon = ({id}: {id: number | undefined}) => {
+export const ReactionIcon = ({id}: {id: string | undefined}) => {
     const { reactions } = useReactionsStore();
 
   let Icon: LucideIcon;

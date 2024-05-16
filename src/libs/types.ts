@@ -1,22 +1,19 @@
 import { LucideIcon } from "lucide-react";
 
 
-export interface UserInfo {
-    email: string;
-    fullname: string
-}
-
-export interface Token {
+export interface AuthToken {
     accessToken: string;
     refreshToken: string
 }
 
 export interface User {
-    id: string;
-    email: string;
-    fullname: string | undefined;
+    id: string;  
+    fullname: string;
     avatar: string | undefined;
     isOnline: boolean;
+}
+export interface Profile extends User{
+    email: string;   
 }
 
 export interface MessageData {
@@ -34,27 +31,6 @@ export interface MessageDetail {
     messageId: string;
     reactionId: string;
     user: User
-}
-export interface PrivateRoomInfo {
-    userId: string;
-    privateRoomId: string;
-    firstMessageId: string | undefined;
-    firstUnseenMessageId: string | undefined;
-    canRoomDisplay: boolean;
-    unseenMessageCount: number;
-}
-export interface PrivateRoom {
-    id: string;
-    friend: User;
-    previousLastMessageId: string | undefined;
-    lastMessageId: string | undefined;
-    firstMessageId: string | undefined;
-    firstUnseenMessageId: string;
-    lastUnseenMessage: MessageData | undefined;
-    unseenMessageCount: number | undefined;
-    canRoomDisplay: boolean;
-    privateRoomInfos: PrivateRoomInfo[]
-    chats: MessageData[];
 }
 
 export interface RawRoom {  
@@ -75,6 +51,7 @@ export interface Room extends Omit<RawRoom, "roomMemberInfos"> {
 
 export interface RoomMemberInfo {
     userId: string;
+    roomId: string;
     user: User;
     firstUnseenMessageId: string;
     lastUnseenMessageId: string;
@@ -88,6 +65,11 @@ export interface Reaction {
     id: string;
     name: string;
     icon: LucideIcon;
+}
+
+export interface NoDataHubResponse {
+    isSuccess: boolean;
+    error: any;
 }
 
 export interface HubResponse<T> {

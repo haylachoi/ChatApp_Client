@@ -16,7 +16,7 @@ export const generatePublisher= <T> (subscriber: Map<string, T>) => {
 
 
 export const convertRawRoomToRoom = (rawRoom: RawRoom, currentId: string) => {
-    const roomMemberInfos = rawRoom.roomMemberInfos;
+    const {roomMemberInfos, ...rest} = rawRoom;
     const index = roomMemberInfos.findIndex(info => info.userId === currentId);
 
     if (index === -1) {
@@ -24,7 +24,7 @@ export const convertRawRoomToRoom = (rawRoom: RawRoom, currentId: string) => {
     }
 
     const myRoomInfo = roomMemberInfos.splice(index,1)[0];
-    const room: Room = {...rawRoom, currentRoomMemberInfo: myRoomInfo, otherRoomMemberInfos: roomMemberInfos, chats: undefined}
+    const room: Room = {...rest, currentRoomMemberInfo: myRoomInfo, otherRoomMemberInfos: roomMemberInfos, chats: undefined}
     return room;
 }
 

@@ -4,8 +4,11 @@ export const BASE_REST_URL = import.meta.env.BASE_REST_URL || "https://localhost
 export const BASE_WS_URL = import.meta.env.BASE_WS_URL || "https://localhost:7100";
 
 export const REST_SEGMENT = {
-    AUTH: `${BASE_REST_URL}/auth`,
-    FILE: `${BASE_REST_URL}/file`,
-    CHAT: `${BASE_REST_URL}/chat`,
-    GROUP: `${BASE_REST_URL}/group`,
+    AUTH: `/auth`,
+    FILE: `/file`,
+    CHAT: `/chat`,
+    GROUP: `/group`,
+    USER: `/user`,
 }
+
+export const CONNECTION_MAX_ATTEMPT = 5;

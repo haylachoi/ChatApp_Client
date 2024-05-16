@@ -5,47 +5,54 @@ import Login from './pages/login/login';
 import Main from './pages/main/main';
 import { authService } from './services/authService';
 import {
-  chatConnection,
-  roomConnection,
-  userConnection,
+  chatHub,
+  roomHub,
+  userHub,
 } from './services/hubConnection';
-import { useIsLogin, useUserActions } from './stores/userStore';
+import { useIsLogin, useAuthActions, useIsConnected } from './stores/authStore';
+import { userService } from './services/userService';
 
+// const App = () => {
+//   useEffect(() => {
+//     chatHub.start();
+//   },[])
+//   return <div></div>
+// }
 const App = () => {
   const [isFetching, setIsFetching] = useState(false);
   const isLogin = useIsLogin();
-  const { setIsLogin, setCurrentUser } = useUserActions();
-  const [isConnected, setIsConnected] = useState(false);
+  const isConnected = useIsConnected();
+  const { setIsLogin, setCurrentUser, setIsConnected } = useAuthActions();
+ 
 
   useEffect(() => {
     const start = async () => {
       try {
         setIsFetching(true)
-        const response = await authService.getProfile()
-        if (response.ok) {
-          const data = await response.json()
-          setCurrentUser(data)
+        console.log("fetch user")
+        const user = await userService.getProfile();
+        
+          setCurrentUser(user);
           setIsLogin(true)
-        }
+        
       } catch (error) {
         console.log(error)
         setIsLogin(false)
       } finally {
         setIsFetching(false)
       }
-    }
-
-    start()
+    }  
+      start()
   }, [isConnected])
 
   useEffect(() => {
     if (isLogin) {
       const connectSignalr = async () => {
         try {
-          await chatConnection.start()
+          await chatHub.start()
           await Promise.all([
-            userConnection.start(),
-            roomConnection.start(),
+            userHub.start(),
+            roomHub.start(),
           ])
           setIsConnected(true)
         } catch (error) {}

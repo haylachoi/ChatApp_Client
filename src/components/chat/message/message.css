@@ -4,9 +4,9 @@
   display: flex;
   gap: 10px;
   position: relative;
-  
- 
   align-self: start;
+  max-width: 70%;
+  min-width: 150px;
   &.own {
     align-self: flex-end;  
     .message-wrapper {
@@ -19,40 +19,42 @@
     display: flex;
     flex-direction: column;
     gap:2px;
-    max-width: 70%;
-    min-width: 150px;
+   
+    width: 100%;
     padding: 10px;
     border-radius: 10px;
     background-color: rgba(17, 25, 40, 0.8);
     padding:10px;
+
+    .message-content {
+      width: 100%;
+      height: 100%;  
+     
+      .message-owner {
+        font-size: 0.75rem;
+        margin-bottom: 5px;
+        font-weight: 100;
+        color: aquamarine;
+      }
+      p {
+        font-size: 1.25rem;
+        word-wrap: break-word;
+      }
+      img {
+        width: 100%;
+        height: 300px;
+        border-radius: 10px;
+        object-fit: cover;
+      }
+    }
   }
 
   .message-avatar {
       width: 36px;
       height: 36px;
       border-radius: 9999px;
-    }
-  .message-content {
-    width: 100%;
-    height: 100%;  
-   
-    .message-owner {
-      font-size: 0.75rem;
-      margin-bottom: 5px;
-      font-weight: 100;
-      color: aquamarine;
-    }
-    p {
-      font-size: 1.25rem;
-      word-wrap: break-word;
-    }
-    img {
-      width: 100%;
-      height: 300px;
-      border-radius: 10px;
-      object-fit: cover;
-    }
   }
+  
 
 
   .reaction-tray {

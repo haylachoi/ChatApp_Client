@@ -6,57 +6,42 @@ import { useReactionsStore } from '@/stores/reactionStore'
 import { LucideIcon, ThumbsDown, ThumbsUp } from 'lucide-react'
 import React, { useEffect } from 'react'
 import "./main.css";
-import { roomService } from '@/services/roomService'
 import { useCurrentRoom, useRoomActions, useRoomChats } from '@/stores/roomStore'
-import { useCurrentUser } from '@/stores/userStore'
-import { convertRawRoomToRoom } from '@/libs/utils'
+import { useCurrentUser } from '@/stores/authStore'
 import Chat from '@/components/chat/chat'
 import AppModal from '@/components/app-modal/app-modal'
+import useRoomMemberEvent from '@/hooks/useRoomMemberEvent'
+import useSeenEvent from '@/hooks/useSeenEvent'
+import useReactionEvent from '@/hooks/useReactionEvent'
+import useUpdateLastMessageEvent from '@/hooks/useUpdateLastMessageEvent'
+import useConnectedUserEvent from '@/hooks/useConnectedUserEvent'
+import { chatHub, peer } from '@/services/hubConnection'
+import CallVideo from '@/components/call-video/call-video'
+import { useVideoCallActions } from '@/stores/videoCallStore'
 
 const Main = () => {
   const currentUser = useCurrentUser();
   if (!currentUser ) return <></>;
   const currentRoom = useCurrentRoom();
 
-  const roomChats = useRoomChats();
-  const { updateSeenMessage, updateLastMessage, updateReactionMessage, updateCanDisplayRoom} =
-    useRoomActions();
-
+  const {setStream}= useVideoCallActions();
   const { setReactions } = useReactionsStore();
+  useRoomMemberEvent();
+  useSeenEvent();
+  useReactionEvent();
+  useUpdateLastMessageEvent();
+  useConnectedUserEvent();
   const reactionIconMapping = {
     Like: ThumbsUp,
     Hate: ThumbsDown
   }
-  useEffect(() => {
-    const seenMessageEventId = chatService.onUpdateIsReaded.sub((messageDetail, rawRoom) => {
-      const room = convertRawRoomToRoom(rawRoom, currentUser.id);
-      console.log(messageDetail, room);
-      if (!room) return;
-      updateSeenMessage(room, messageDetail);
-    })
-
-    return () => {
-      chatService.onUpdateIsReaded.unsub(seenMessageEventId)
-    }
-  }, [])
-
-  useEffect(() => {
-    const reactionMessageEventId = chatService.onUpdateReactionMessage.sub((roomId, messageDetail) => {
-      updateReactionMessage(roomId, messageDetail);
-    })
-    
-    return () => {
-      chatService.onUpdateIsReaded.unsub(reactionMessageEventId)
-    }
-  }, [])
-
+ 
   useEffect(() => {
     userService
       .getReactions()
       .then((result) => {
         const map = new Map<string,Reaction>();
-        result.data.forEach((reaction: Reaction) => {
-          const name = reaction.name;
+        result.data.forEach((reaction: Reaction) => {       
           reaction.icon = reactionIconMapping[reaction.name as keyof {Like: LucideIcon, Hate: LucideIcon}];
           map.set(reaction.id, reaction);
         });
@@ -64,55 +49,46 @@ const Main = () => {
       })
       .catch((error) => {})
 
-    const key = chatService.onReceiveMessage.sub((message) => {    
-      updateLastMessage(message.roomId, message)
-      let room = roomChats.find((room) => room.id == message.roomId);
-      if (room && !room.currentRoomMemberInfo.canDisplayRoom) {
-        roomService.updateCanMessageDisplay(room.id, true).then((result) => {
-          if (result.isSuccess) {
-            const roomInfo = result.data;
-            updateCanDisplayRoom(room.id, roomInfo.canDisplayRoom);
-          }
-        });
-      }
-    })
+  }, [])
+
+  useEffect(() => {     
+  
+   
+    const key = chatService.onCallVideo.sub(async (roomId: string, peerId: string) => {
+    
+      // const conn = peer.connect(peerId);
+      // if (!conn) {return;}
+      // console.log('start call video', conn)
+      // conn.on('open', () => {
+      //     conn.send('hi');
+      //     conn.send('are you ok');
+      // })
+
+      var stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      console.log('peerId', peerId)
+      var call = peer.call(peerId, stream); 
+      setStream(stream);
+      // call.on('stream', (remoteStream) => {
+      //   console.log("start permssion")
+      //   // Show stream in some video/canvas element.
+      //   setStream(remoteStream);
+        
+      // });
+     
+    });
 
     return () => {
-      chatService.onReceiveMessage.unsub(key)
+      chatService.onCallVideo.unsub(key);
     }
-  }, [])
-
-  useEffect(() => {
-   
-      userService.onConnected((user) => {
-        Notification.requestPermission().then((per) => {
-          if (per === 'granted') {
-            var notification = new Notification('Thông báo', {
-              body: `${user.fullname} đã online`,
-              icon: 'icon.jpg',
-            })
-          }
-        })
-      })
-      userService.onDisconnected((message) => {
-        Notification.requestPermission().then((per) => {
-          if (per === 'granted') {
-            var notification = new Notification('Thông báo', {
-              body: message,
-              icon: 'icon.jpg',
-            })
-          }
-        })
-      })
     
-  }, [])
+  },[])
 
   return (
     <>
      <div className="side-bar">
       <Sidebar />
      </div>
-
+     <CallVideo/>
      <div className="main-content">
      {currentRoom && <Chat />}
       {/* <Detail/> */}

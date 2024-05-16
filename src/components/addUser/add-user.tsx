@@ -5,7 +5,7 @@ import React from "react";
 import { userService } from "@/services/userService";
 import { roomService } from "@/services/roomService";
 import { User } from "@/libs/types";
-import { useCurrentUser } from "@/stores/userStore";
+import { useCurrentUser } from "@/stores/authStore";
 
 const AddUser = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -40,7 +40,7 @@ const AddUser = () => {
   return (
     <div className="addUser">
       <form onSubmit={handleSearch}>
-        <input type="text" placeholder="name" name="Nhập tên" />
+        <input type="text" name="searchTerm" placeholder="Nhập tên" />
         <button>Tìm kiếm</button>
       </form>
       {users && users.map((user) => (

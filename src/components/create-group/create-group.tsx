@@ -1,6 +1,7 @@
 import React from 'react'
 import "./create-group.css"
 import { roomService } from '@/services/roomService';
+import { groupService } from '@/services/groupService';
 
 const CreateGroup = () => {
 
@@ -10,7 +11,7 @@ const CreateGroup = () => {
         const element = e.currentTarget;
         const formData = new FormData(element);
         console.log(formData, formData.get("groupName"));
-        roomService.createGroup(formData).then((result) => {
+        groupService.createGroup(formData).then((result) => {
 
         }).catch((error) => {
             console.log(error);

@@ -1,4 +1,5 @@
-import { MessageData, MessageDetail, Room, User } from "@/libs/types";
+import AddGroupMember from "@/components/add-group-member/add-group-member";
+import { MessageData, MessageDetail, Room, RoomMemberInfo, User } from "@/libs/types";
 import { roomService } from "@/services/roomService";
 import { create } from "zustand";
 
@@ -13,6 +14,9 @@ interface useRoomStoreProps {
   fetchRoomChats: (currentUserId: string) => void;
   addRoomChat: (roomChat: Room) => void;
   replaceChats: (roomId: string, chats: MessageData[]) =>void;
+  
+  addRoomMember: (roomMemberInfo: RoomMemberInfo) => void;
+  removeRoomMember: (roomMemberInfo: RoomMemberInfo) => void;
   
   updateSeenMessage: (room: Room, messageDetail: MessageDetail) => void;
   updateReactionMessage:(roomId: string, messageDetail: MessageDetail) => void;
@@ -34,7 +38,7 @@ const useRoomStore = create<useRoomStoreProps>()((set) => ({
       const roomChats = await roomService.getRooms(currentUserId);
       console.log(roomChats);
          
-      set({roomChats})
+      set({roomChats});
     } catch (error) {
       console.log(error);
     }
@@ -48,9 +52,36 @@ const useRoomStore = create<useRoomStoreProps>()((set) => ({
       if (!room) return state;
       
       room.chats= chats;
-      return {...state, roomChats: [...state.roomChats]}
+      return {...state, roomChats: [...state.roomChats]};
   }),
 
+  addRoomMember: (roomMemberInfo) => set((state) => {
+    let room = state.roomChats.find(room => room.id == roomMemberInfo.roomId);
+    if (!room) return state;
+   
+    const existedRoomMember = room.otherRoomMemberInfos.find((info) => info.userId === roomMemberInfo.userId);
+    if (existedRoomMember){
+      return state;
+    }
+    
+    room.otherRoomMemberInfos.push(roomMemberInfo);
+    return {...state, roomChats: [...state.roomChats]};
+  }),
+  removeRoomMember: (roomMemberInfo) => set((state) => {
+    let room = state.roomChats.find(room => room.id == roomMemberInfo.roomId);
+    if (!room) return state;
+    
+    if (room.currentRoomMemberInfo.userId === roomMemberInfo.userId){
+      return { roomChats: state.roomChats.filter((r) => r.id !== roomMemberInfo.roomId)};
+    }
+
+    const existedRoomMember = room.otherRoomMemberInfos.find((info) => info.userId === roomMemberInfo.userId);
+    if (!existedRoomMember){
+      return state;
+    }
+    room.otherRoomMemberInfos = room.otherRoomMemberInfos.filter((info) => info.userId !== roomMemberInfo.userId);
+    return {...state, roomChats: [...state.roomChats]};
+  }),
 
   updateCanDisplayRoom: (roomId, canDisplay) => set((state) => {
     let room = state.roomChats.find(room => room.id == roomId);
@@ -151,7 +182,10 @@ export const useRoomActions = () =>  useRoomStore(state => ({
   fetchRoomChats: state.fetchRoomChats,
   addRoomChat: state.addRoomChat,
   replaceChats: state.replaceChats,
-  
+
+  addRoomMember: state.addRoomMember,
+  removeRoomMember: state.removeRoomMember,
+
   updateCanDisplayRoom: state.updateCanDisplayRoom,
   updateReactionMessage: state.updateReactionMessage,
   updateFirstMessageId: state.updateFirstMessageId,

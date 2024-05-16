@@ -4,7 +4,7 @@ import { useReactionsStore } from '@/stores/reactionStore';
 import React from 'react';
 import "./reaction-menu-button.css";
 import { ReactionIcon } from '../reaction-icon/reaction-icon';
-import { useCurrentUser } from '@/stores/userStore';
+import { useCurrentUser } from '@/stores/authStore';
 
 const ReactionMenuButton = ({ message }: { message: MessageData }) => {
     const currentUser = useCurrentUser();

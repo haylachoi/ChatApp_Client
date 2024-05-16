@@ -1,10 +1,11 @@
 import { User } from '@/libs/types';
 import { userService } from '@/services/userService';
-import { useCurrentUser } from '@/stores/userStore';
+import { useCurrentUser } from '@/stores/authStore';
 import React, { FormEvent, useState } from 'react'
 import './add-group-member.css'
-import { roomService } from '@/services/roomService';
 import { useCurrentRoom } from '@/stores/roomStore';
+import { groupService } from '@/services/groupService';
+
 
 const AddGroupMember = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -18,9 +19,8 @@ const AddGroupMember = () => {
     const formData = new FormData(e.target as HTMLFormElement);
     const searchTerm = formData.get("searchTerm") as string;
     
-
     try {
-      const result = await userService.searchUser(searchTerm);
+      const result = await userService.searchUserNotInRoom(currentRoom.id, searchTerm);
       if (result.isSuccess) {
         setUsers(result.data);
       }
@@ -31,7 +31,10 @@ const AddGroupMember = () => {
 
   const handleAdd = async (id: string) => {
     try {
-       const result = roomService.addGroupMember(currentRoom.id, id);
+       const result = await groupService.addGroupMember(currentRoom.id, id);
+       if (result.isSuccess){
+        setUsers(pre => pre.filter(u => u.id !== id));
+       }
     } catch (err) {
       console.log(err);
     }
@@ -39,7 +42,7 @@ const AddGroupMember = () => {
   return (
     <div className="add-group-member">
       <form onSubmit={handleSearch}>
-        <input type="text" placeholder="name" name="Nhập tên" />
+        <input type="text" placeholder="Nhập tên" name="searchTerm" />
         <button>Tìm kiếm</button>
       </form>
       {users && users.map((user) => (

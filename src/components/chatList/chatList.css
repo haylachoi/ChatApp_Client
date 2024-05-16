@@ -74,7 +74,15 @@
       flex-direction: column;
       gap: 10px;
       width: 100%;
+      .message-unseen-content {
+        max-width: 50%;
+        white-space: nowrap;
+        overflow: hidden;
 
+        .message-img-icon {
+          color: #5dda8766
+        }
+      }
       .room-additional-info {
         display: flex;
         justify-content: space-between;

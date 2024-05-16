@@ -1,0 +1,23 @@
+.infinite-scrollable {
+    .go-to-last-btn {
+        position: sticky;
+        outline: none;
+        border: none;
+        bottom: 15px;
+        left: 100%;
+        opacity: 0.2;
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        background-color: rgba(28, 211, 83, 0.8);
+        visibility: collapse;
+        cursor: pointer;
+        transition: all 0.5s;
+        &:hover {
+            opacity: 0.5;
+        }
+    }
+    .show {
+        visibility: visible;
+    }
+}

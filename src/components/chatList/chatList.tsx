@@ -2,50 +2,52 @@ import { useEffect, useState } from 'react'
 import { MdOutlineGroupAdd } from "react-icons/md";
 import { IoPersonAddOutline } from "react-icons/io5";
 import './chatList.css'
-import AddUser from '../addUser/add-user'
 import React from 'react'
-import { roomService } from '@/services/roomService'
-import Modal from '@/components/ui/modal/modal'
 
-import { useCurrentUser } from '@/stores/userStore'
+import { useCurrentUser } from '@/stores/authStore'
 import {
   useCurrentRoom,
   useRoomActions,
   useRoomChats,
 } from '@/stores/roomStore'
-import { convertRawRoomToRoom } from '@/libs/utils'
-import CreateGroup from '../create-group/create-group';
+import useCreateRoomEvent from '@/hooks/useCreateRoomEvent';
+import { ModalElement, useAppModalActions } from '@/stores/modalStore';
 
 const ChatList = () => {
-  const [isSearchFriendOpen, setIsSearchFriendOpen] = useState(false)
-  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false)
+  const currentRoom = useCurrentRoom()
+  const currentUser = useCurrentUser()
+  if (!currentUser || !currentUser.id) return <></>;
+
+  const {setCurrentModal, openModal} = useAppModalActions();
   const [input, setInput] = useState('')
 
-  const currentUser = useCurrentUser()
   const roomChats = useRoomChats()
-  const currentRoom = useCurrentRoom()
-  const { fetchRoomChats, addRoomChat, setCurrentRoom } = useRoomActions()
+  const { fetchRoomChats, setCurrentRoom } = useRoomActions()
 
+  const filtedRoom = roomChats.filter((room) => {
+    if (room.isGroup) {
+      return room.name?.toLowerCase().includes(input.toLowerCase());
+    } else {
+      return room.otherRoomMemberInfos[0].user.fullname.toLowerCase().includes(input.toLowerCase());
+    }
+  })
+  const handleOpenAddUser = () => {
+    setCurrentModal(ModalElement.addUser);
+    openModal();
+  }
+
+  const handleOpenCreateGroup = () => {
+    setCurrentModal(ModalElement.createGroup);
+    openModal();
+  }
+
+  useCreateRoomEvent();
   useEffect(() => {
     if (currentUser?.id) {
       fetchRoomChats(currentUser.id)
     }
-
-    const createRoomEventId = roomService.onCreateRoom.sub((rawRoom) => {
-      if (!currentUser || !currentUser.id) return;
-      const room = convertRawRoomToRoom(rawRoom, currentUser.id);
-      console.log(room);
-      if (room) {
-        addRoomChat(room)
-      }
-    })
-    
-    return () => {
-      roomService.onCreateRoom.unsub(createRoomEventId)
-    }
   }, [])
   
-  if (!currentUser || !currentUser.id) return <></>;
 
   return (
     <div className="chatList">
@@ -60,16 +62,16 @@ const ChatList = () => {
         </div>
 
        <div className="group-btn">
-       <button className="add-btn" onClick={() => setIsSearchFriendOpen((prev) => !prev)}>
+       <button className="add-btn" onClick={handleOpenAddUser}>
           <IoPersonAddOutline className="add-icon" />
         </button>
-        <button className="add-btn" onClick={() => setIsCreateGroupOpen((prev) => !prev)}>
+        <button className="add-btn" onClick={handleOpenCreateGroup}>
           <MdOutlineGroupAdd className="add-icon" />
         </button>
        </div>
       </div>
-      {roomChats &&
-        roomChats.map((roomChat) => {
+      {filtedRoom &&
+        filtedRoom.map((roomChat) => {
           if (!roomChat.currentRoomMemberInfo.canDisplayRoom) return;
           return (
             <div
@@ -79,10 +81,7 @@ const ChatList = () => {
               key={roomChat.id}
               onClick={() => {
                 setCurrentRoom(roomChat)
-              }}
-              //  style={{
-              //    backgroundColor: chat?.isSeen ? "transparent" : "#5183fe",
-              //  }}
+              }}          
             >
               {!roomChat.isGroup && (
                 <>
@@ -100,10 +99,10 @@ const ChatList = () => {
                     </span>
                     {roomChat.currentRoomMemberInfo.lastUnseenMessage && (
                       <div className="room-additional-info">
-                        <span>
+                        <span className="message-unseen-content">                     
                           {
-                            roomChat.currentRoomMemberInfo.lastUnseenMessage
-                              .content
+                            roomChat.currentRoomMemberInfo.lastUnseenMessage.isImage ? <span className="message-img-icon">Hình ảnh</span> : roomChat.currentRoomMemberInfo.lastUnseenMessage
+                            .content
                           }
                         </span>
                         <span
@@ -147,14 +146,8 @@ const ChatList = () => {
               )}
             </div>
           )
-        })}
-      <Modal isOpen={isSearchFriendOpen} onClose={() => setIsSearchFriendOpen(false)}>
-        <AddUser />
-      </Modal>
-      <Modal isOpen={isCreateGroupOpen} onClose={() => setIsCreateGroupOpen(false)}>
-        <CreateGroup />
-      </Modal>
-      {/* {addMode && <AddUser />} */}
+        })}   
+    
     </div>
   )
 }

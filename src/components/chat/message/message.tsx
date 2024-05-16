@@ -7,7 +7,7 @@ import { chatService } from '@/services/chatService';
 import ReactionMenuButton from './reaction/reaction-menu-button';
 import { ReactionIcon } from './reaction-icon/reaction-icon';
 import { useCurrentRoom } from '@/stores/roomStore';
-import { useCurrentUser } from '@/stores/userStore';
+import { useCurrentUser } from '@/stores/authStore';
 
 interface MessageProps {
   index: number;
@@ -47,33 +47,32 @@ const Message: React.FC<MessageProps> = ({
     }
     return acc;
   }, initReactionData);
+
+  const handleRef: React.LegacyRef<HTMLDivElement> | undefined = (el) => {
+    if (
+      !message.messageDetails.find((md) => md.userId == currentUser.id) &&
+      message.senderId !== currentUser?.id &&
+      !messagesRef.current.find((e) => e?.dataset.id == message.id)
+    ) {
+      messagesRef.current.push(el);
+    }
+    if (message.id == currentRoom.currentRoomMemberInfo.firstUnseenMessageId) {
+      firstUnseenMessageRef.current = el;
+    }
+
+    if (currentRoom?.chats && index == currentRoom?.chats?.length - 1)
+      lastMessageRef.current = el;
+  };
   return (
     <div
       id={`private_message_${message.id}`}
-      // ref={index == currentRoom.chats.length -1 ? lastMessageRef : null}
-      ref={(el) => {
-        if (
-          !message.messageDetails.find((md) => md.userId == currentUser.id) &&
-          message.senderId !== currentUser?.id &&
-          !messagesRef.current.find((e) => e?.dataset.id == message.id)
-        ) {
-          messagesRef.current.push(el);
-        }
-        if (
-          message.id == currentRoom.currentRoomMemberInfo.firstUnseenMessageId
-        ) {
-          firstUnseenMessageRef.current = el;
-        }
-
-        if (currentRoom?.chats && index == currentRoom?.chats?.length - 1)
-          lastMessageRef.current = el;
-      }}
+      ref={handleRef}
       data-id={message.id}
       className={
         message.senderId === currentUser?.id ? 'message-box own' : 'message-box'
       }
       key={message?.id}>
-         {messageOwner && (
+      {messageOwner && (
         <img
           className="message-avatar"
           src={messageOwner.avatar ?? '/avatar.png'}
@@ -94,7 +93,7 @@ const Message: React.FC<MessageProps> = ({
         {messageReactionData.length > 0 && (
           <div className="reaction-tray">
             {messageReactionData.map((data) => (
-              <ReactionIcon key={data.id} id={+data.id} />
+              <ReactionIcon key={data.id} id={data.id} />
             ))}
           </div>
         )}
@@ -108,7 +107,6 @@ const Message: React.FC<MessageProps> = ({
           <span>{format(new Date(message.createdAt!))}</span>
         </div>
       </div>
-     
     </div>
   );
 };

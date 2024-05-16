@@ -59,11 +59,11 @@
     }
     .left-btn {
       border-radius: 9999px 0 0 9999px;
-      background-color: hsla(130, 70%, 41%, 0.623);
+      background-color: var(--green);
     }
     .right-btn {
       border-radius: 0 9999px 9999px 0;
-      background-color:  hsla(30, 100%, 50%, 1);
+      background-color:  var(--orange);
     }
     button {
       display: grid;

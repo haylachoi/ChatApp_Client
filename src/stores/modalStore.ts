@@ -2,6 +2,8 @@ import { create } from 'zustand';
 
 export enum ModalElement {
     addUser,
+    createGroup,
+    profile,
     groupManager,
 }
 interface useModalStoreProps {
