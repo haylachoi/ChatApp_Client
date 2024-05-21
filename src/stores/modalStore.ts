@@ -8,15 +8,15 @@ export enum ModalElement {
 }
 interface useModalStoreProps {
     isOpen: boolean;
-    currentModal: ModalElement | undefined
+    currentModal?: ModalElement
     closeModal: () => void;
     openModal: () => void;
-    setCurrentModal: (currentModal: ModalElement) => void;
+    setCurrentModal: (currentModal: ModalElement | undefined) => void;
 }
 
 const useModalStore = create<useModalStoreProps>()((set) => ({
     isOpen: false,
-    currentModal: undefined,
+   
     closeModal: () => set({isOpen: false}),
     openModal: () => set({isOpen: true}),
     setCurrentModal: (currentModal) => set({currentModal})

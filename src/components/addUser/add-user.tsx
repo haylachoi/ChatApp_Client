@@ -43,8 +43,10 @@ const AddUser = () => {
         <input type="text" name="searchTerm" placeholder="Nhập tên" />
         <button>Tìm kiếm</button>
       </form>
+      <div className="separator"></div>
+      <ul>
       {users && users.map((user) => (
-        <div key={user.id} className="user">
+        <li key={user.id} className="user">
           <div className="detail">
             <img src={user?.avatar || "./avatar.png"} alt="" />
             <span>{user?.fullname}</span>
@@ -53,8 +55,9 @@ const AddUser = () => {
           <button className="left-btn" onClick={() => handleAdd(user.id!)}>Nhắn tin</button>
           <button className="right-btn" onClick={() => handleAdd(user.id!)}>Kết bạn</button>
          </div>
-        </div>
+        </li>
       ))}
+      </ul>
       
     </div>
   );

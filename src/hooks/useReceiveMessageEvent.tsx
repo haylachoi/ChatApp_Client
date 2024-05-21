@@ -5,13 +5,15 @@ import React, { useEffect } from 'react';
 
 const useReceiveMessageEvent = () => {
   const currentRoom = useCurrentRoom();
-  if (!currentRoom) return;
   const { addMesageToRoom } = useRoomActions();
   useEffect(() => {
+    if (!currentRoom) return;
     const key = chatService.onReceiveMessage.sub((message) => {
-      if (message.roomId == currentRoom.id) {
-        addMesageToRoom(message.roomId, message);
-      }
+      if (message.roomId === currentRoom.id) {
+        if (!currentRoom.chats || currentRoom.chats.length < 1 || currentRoom.chats[currentRoom.chats.length -1].id === currentRoom.previousLastMessageId) {
+          addMesageToRoom(message.roomId, message);
+        }
+      }  
     });
 
     return () => {

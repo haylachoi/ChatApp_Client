@@ -1,21 +1,12 @@
 import {
-  KeyboardEventHandler,
-  LegacyRef,
-  UIEventHandler,
   useEffect,
   useRef,
-  useState,
 } from 'react';
 import './chat.css';
 
-import { format } from 'timeago.js';
 import React from 'react';
-import { chatService } from '@/services/chatService';
 import { roomService } from '@/services/roomService';
-import useDebounce from '@/hooks/useDebouce';
-import { useReactionsStore } from '@/stores/reactionStore';
 import Message from './message/message';
-import { Room } from '@/libs/types';
 import { useCurrentUser } from '@/stores/authStore';
 import { useCurrentRoom, useRoomActions } from '@/stores/roomStore';
 import Heading from './heading/heading';
@@ -46,9 +37,6 @@ const Chat = () => {
   const firstUnseenMessageRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<(HTMLDivElement | null)[]>([]);
  
-  
-  const [isGoToUnseenMessage, setIsGoToUnseenMessage] = useState(false);
-  
 
   useObserveUnseenMessage(chatViewportRef, messagesRef);
   useReceiveMessageEvent();
@@ -69,21 +57,6 @@ const Chat = () => {
         +currentRoom.lastMessageId;
 
 
-  const handleGoToLast = () => {
-    if (!currentRoom.chats || currentRoom.chats.length === 0) {
-      return;
-    }
-    roomService
-      .getNextMessages(
-        currentRoom.id,
-        currentRoom.chats[currentRoom.chats.length - 1].id,
-        null,
-      )
-      .then((result) => {
-        console.log(result);
-      })
-      .catch((error) => {});
-  };
 
   const fetchPrevious = async () => {
     if (!currentRoom || !currentRoom.chats) return;
@@ -119,7 +92,6 @@ const Chat = () => {
         // load some message
         if (currentRoom.id && !currentRoom.chats) {
           const result = await roomService.getSomeMessages(currentRoom.id);
-          // console.log('start', result, currentRoom.id);
           const messages = result.data;
           replaceChats(currentRoom.id, messages);
         }
@@ -143,10 +115,14 @@ const Chat = () => {
  useEffect(() => {
   if(currentRoom.chats && currentRoom.chats.length > 0){
     const lastMessage = currentRoom.chats[currentRoom.chats.length-1];
-    if (isInView && lastMessage.senderId !== currentUser.id){
+    const firstUnseenMessageId = currentRoom.currentRoomMemberInfo.firstUnseenMessageId;
+    if (firstUnseenMessageId) {
+      firstUnseenMessageRef.current?.scrollIntoView({ behavior: 'smooth' , block: 'nearest' });
+    }    
+    else if (isInView && lastMessage.senderId !== currentUser.id){
       lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
     } 
-    if ( lastMessage.senderId === currentUser?.id) {
+    else if ( lastMessage.senderId === currentUser.id) {
       lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }
@@ -171,7 +147,6 @@ const Chat = () => {
               firstUnseenMessageRef={firstUnseenMessageRef}
             />
           ))}
-        {/* <button className="go-to-last" onClick={handleGoToLast}>Go To</button> */}
       </InfiniteScrollable>
       <ChatPrompt/>
      

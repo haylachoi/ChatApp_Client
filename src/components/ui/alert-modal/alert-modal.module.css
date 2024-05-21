@@ -1,0 +1,15 @@
+.alert-modal {
+  background-color: var(--background-color-dark);
+  backdrop-filter: blur(39px) saturate(180%);
+  border: 1px solid var(--border-color);
+  color: white;
+  padding: 20px;
+
+  &.center-center{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+  }
+  
+}

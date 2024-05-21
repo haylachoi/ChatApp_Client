@@ -3,21 +3,15 @@ import React from 'react';
 
 import Login from './pages/login/login';
 import Main from './pages/main/main';
-import { authService } from './services/authService';
 import {
   chatHub,
+  clientHub,
   roomHub,
   userHub,
 } from './services/hubConnection';
 import { useIsLogin, useAuthActions, useIsConnected } from './stores/authStore';
 import { userService } from './services/userService';
 
-// const App = () => {
-//   useEffect(() => {
-//     chatHub.start();
-//   },[])
-//   return <div></div>
-// }
 const App = () => {
   const [isFetching, setIsFetching] = useState(false);
   const isLogin = useIsLogin();
@@ -53,6 +47,7 @@ const App = () => {
           await Promise.all([
             userHub.start(),
             roomHub.start(),
+            clientHub.start(),
           ])
           setIsConnected(true)
         } catch (error) {}

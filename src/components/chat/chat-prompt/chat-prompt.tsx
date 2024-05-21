@@ -1,13 +1,11 @@
 import { chatService } from '@/services/chatService';
 import { useCurrentRoom } from '@/stores/roomStore';
-import { useCurrentUser } from '@/stores/authStore';
 import React, { KeyboardEventHandler, useRef, useState } from 'react';
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import './chat-prompt.css';
 
 const ChatPrompt = () => {
-  const currentUser = useCurrentUser();
   const currentRoom = useCurrentRoom();
   if (!currentRoom) return <></>;
   const isReceiverBlocked = false;
@@ -102,8 +100,7 @@ const ChatPrompt = () => {
         onClick={handleSend}
         disabled={isCurrentUserBlocked || isReceiverBlocked}>
         Send
-      </button>
-      ,
+      </button>  
     </div>
   );
 };

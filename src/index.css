@@ -18,18 +18,24 @@ body {
 .container {
   width: 80vw;
   height: 90vh;
-  background-color: rgba(17, 25, 40, 0.75);
+  background-color: var(--background-color);
   backdrop-filter: blur(19px) saturate(180%);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.125);
+  border: 1px solid var(--border-color);
   display: flex;
+}
+
+.separator {
+  width: 90%;
+  border-top: 1px solid #dddddd35;
+  margin: 10px auto;
 }
 
 .loading{
   padding: 50px;
   font-size: 36px;
   border-radius: 10px;
-  background-color: rgba(17, 25, 40, 0.9);
+  background-color: var(--background-color-dark);
 }
 
 .btn-none {
@@ -39,9 +45,35 @@ body {
   background-color: transparent;
 }
 
+.text-green {
+  color: var(--green);
+}
+
+.text-orange {
+  color: var(--orange);
+}
+
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 20px;
+  margin-left: 20px ;
+}
+
+.ping {
+  animation: ping 1s infinite alternate ease-in-out;
+}
+
+@keyframes ping {
+  100% {
+    transform: scale(120%, 120%);
+  }
+}
 :root {
   --green: hsla(130, 70%, 41%, 0.623);
   --orange: hsla(30, 100%, 50%, 1);
+  --background-color: hsla(219, 40%, 11%, 0.75);
+  --background-color-dark: hsla(219, 40%, 11%, 0.9);
+  --background-color-secondary: hsla(220, 22%, 73%, 0.9);
+  --border-color: rgba(255, 255, 255, 0.125)
 }
 /* ::-webkit-scrollbar {
   background: transparent;

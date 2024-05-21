@@ -33,6 +33,12 @@ export interface MessageDetail {
     user: User
 }
 
+export interface GroupInfo {
+    id: string;
+    name: string;
+    avatar?: string;
+    groupOnwerId: string;
+}
 export interface RawRoom {  
     id: string;
     name: string | undefined;
@@ -41,11 +47,13 @@ export interface RawRoom {
     lastMessageId: string;
     firstMessageId: string;
     roomMemberInfos: RoomMemberInfo[];
+    groupInfo: GroupInfo;
 }
 export interface Room extends Omit<RawRoom, "roomMemberInfos"> {
     currentRoomMemberInfo: RoomMemberInfo;
     otherRoomMemberInfos: RoomMemberInfo[];
-    chats : MessageData[] | undefined;
+    chats?: MessageData[];
+    previousLastMessageId?: string;  
    
 }
 
@@ -59,7 +67,6 @@ export interface RoomMemberInfo {
     canDisplayRoom: boolean;
     canShowNotification: boolean;
     lastUnseenMessage: MessageData;
-    previousLastMessageId: string | undefined;  
 }
 export interface Reaction {
     id: string;

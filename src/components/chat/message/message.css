@@ -34,7 +34,8 @@
         font-size: 0.75rem;
         margin-bottom: 5px;
         font-weight: 100;
-        color: aquamarine;
+        color: var(--name-color);
+        /* color: aquamarine; */
       }
       p {
         font-size: 1.25rem;

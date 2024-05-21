@@ -10,8 +10,8 @@ import {
   useRoomActions,
   useRoomChats,
 } from '@/stores/roomStore'
-import useCreateRoomEvent from '@/hooks/useCreateRoomEvent';
 import { ModalElement, useAppModalActions } from '@/stores/modalStore';
+import useJoinRoomEvent from '@/hooks/useJoinRoomEvent';
 
 const ChatList = () => {
   const currentRoom = useCurrentRoom()
@@ -24,7 +24,7 @@ const ChatList = () => {
   const roomChats = useRoomChats()
   const { fetchRoomChats, setCurrentRoom } = useRoomActions()
 
-  const filtedRoom = roomChats.filter((room) => {
+  const filtedRooms = roomChats.filter((room) => {
     if (room.isGroup) {
       return room.name?.toLowerCase().includes(input.toLowerCase());
     } else {
@@ -41,7 +41,7 @@ const ChatList = () => {
     openModal();
   }
 
-  useCreateRoomEvent();
+  useJoinRoomEvent();
   useEffect(() => {
     if (currentUser?.id) {
       fetchRoomChats(currentUser.id)
@@ -70,8 +70,8 @@ const ChatList = () => {
         </button>
        </div>
       </div>
-      {filtedRoom &&
-        filtedRoom.map((roomChat) => {
+      {filtedRooms &&
+        filtedRooms.map((roomChat) => {
           if (!roomChat.currentRoomMemberInfo.canDisplayRoom) return;
           return (
             <div
@@ -122,7 +122,7 @@ const ChatList = () => {
                 <>
                   <img src={'./avatar.png'} loading="lazy" alt="" />
                   <div className="texts">
-                    <span>{roomChat.name}</span>
+                    <span>{roomChat.groupInfo.name}</span>
                     {roomChat.currentRoomMemberInfo.lastUnseenMessage && (
                       <div className="room-additional-info">
                         <span>

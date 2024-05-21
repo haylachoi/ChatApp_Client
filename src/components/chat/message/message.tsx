@@ -81,7 +81,7 @@ const Message: React.FC<MessageProps> = ({
       <div className="message-wrapper">
         <div className="message-content">
           {currentRoom.isGroup && (
-            <p className="message-owner">{messageOwner?.fullname}</p>
+            <p className="message-owner" style={{"--name-color": messageOwner?.fullname.toHSL()} as React.CSSProperties}>{messageOwner?.fullname}</p>
           )}
           {message.isImage && <img src={message.content} alt="" />}
           {!message.isImage && (

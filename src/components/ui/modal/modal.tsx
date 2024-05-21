@@ -16,9 +16,6 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   const [isModalOpen, setModalOpen] = useState(isOpen)
   const modalRef = useRef<HTMLDialogElement | null>(null)
-  // const [isOpen, setIsOpen] = useState(false);
-  // const handleClose = () => dialogRef.current?.close();
-  // const handleOpen = () => dialogRef.current?.showModal();
 
   const handleClickOverlay: MouseEventHandler<HTMLDialogElement | null> = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();

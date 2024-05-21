@@ -45,18 +45,20 @@ const AddGroupMember = () => {
         <input type="text" placeholder="Nhập tên" name="searchTerm" />
         <button>Tìm kiếm</button>
       </form>
+      {/* <div className="separator"></div> */}
+      <ul>
       {users && users.map((user) => (
-        <div key={user.id} className="user">
+        <li key={user.id} className="user">
           <div className="detail">
             <img src={user.avatar || "./avatar.png"} alt="" />
             <span>{user.fullname}</span>
           </div>
          <div className="group-btn">
-          <button className="left-btn" onClick={() => handleAdd(user.id)}>Thêm</button>
-        
+          <button className="add-member-btn" onClick={() => handleAdd(user.id)}>Thêm</button>  
          </div>
-        </div>
+        </li>
       ))}
+      </ul>
       
     </div>
   )

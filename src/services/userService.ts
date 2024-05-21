@@ -12,10 +12,10 @@ const searchUser = async (searchTerm: string) => {
     return userHub
       .invoke('SearchUser', searchTerm);      
 }
-const getProfile = async (): Promise<User> => {
+const getProfile = async (): Promise<Profile> => {
     const url = `${REST_SEGMENT.USER}`;
     const result = await httpClient.get(url);
-    return result.data as User;
+    return result.data as Profile;
   };
 
 const getConnectionId = async (): Promise<HubResponse<string>> => {

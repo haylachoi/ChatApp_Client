@@ -8,6 +8,7 @@ import { v4 } from 'uuid'
 const chatHubUrl = `${BASE_WS_URL}/hub/chat`
 const userHubUrl = `${BASE_WS_URL}/hub/user`
 const roomHubUrl = `${BASE_WS_URL}/hub/room`
+const clientHubUrl = `${BASE_WS_URL}/hub/client`
 
 export const chatHub = new HubConnectionBuilder()
   .withUrl(chatHubUrl, { accessTokenFactory: () => {
@@ -27,5 +28,10 @@ export const roomHub = new HubConnectionBuilder()
   .withAutomaticReconnect()
   .build()
 
-export const peerId = v4();
-export const peer = new Peer(peerId);
+export const clientHub = new HubConnectionBuilder()
+  .withUrl(clientHubUrl, { accessTokenFactory: () => getAccessToken() ?? '' })
+  .withAutomaticReconnect()
+  .build()
+
+// export const peerId = v4();
+// export const peer = new Peer(peerId);

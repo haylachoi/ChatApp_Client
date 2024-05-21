@@ -5,14 +5,15 @@ import { create } from "zustand";
 
 
 interface useRoomStoreProps {
-  currentRoom: Room | undefined;
+  currentRoom?: Room;
   roomChats: Room[];
   roomMembers: User[];
 
-  setCurrentRoom: (currentRoom: Room) => void;
+  setCurrentRoom: (currentRoom: Room | undefined) => void;
   setRoomChats: (roomChats: Room[]) => void;
   fetchRoomChats: (currentUserId: string) => void;
   addRoomChat: (roomChat: Room) => void;
+  removeRoomChat: (roomId: string) => void;
   replaceChats: (roomId: string, chats: MessageData[]) =>void;
   
   addRoomMember: (roomMemberInfo: RoomMemberInfo) => void;
@@ -31,7 +32,6 @@ interface useRoomStoreProps {
 }
 
 const useRoomStore = create<useRoomStoreProps>()((set) => ({
-  currentRoom: undefined, 
   setCurrentRoom: (currentRoom) => set({currentRoom}),
   fetchRoomChats: async (currentUserId) => { 
     try {
@@ -47,6 +47,8 @@ const useRoomStore = create<useRoomStoreProps>()((set) => ({
   roomMembers: [],
   setRoomChats: (roomChats) => set({roomChats}),
   addRoomChat: (roomchat) => set((state) => ({ roomChats: [...state.roomChats, roomchat]})),
+  removeRoomChat: (roomId) => set((state) => ({roomChats: state.roomChats.filter((room) => room.id !== roomId)})),
+
   replaceChats: (roomId, chats) => set((state) => {
       let room = state.roomChats.find(room => room.id == roomId);
       if (!room) return state;
@@ -119,7 +121,7 @@ const useRoomStore = create<useRoomStoreProps>()((set) => ({
     let room = state.roomChats.find(room => room.id == roomId);
     if (!room) return state;
    
-    room.currentRoomMemberInfo.previousLastMessageId = room.lastMessageId;
+    room.previousLastMessageId = room.lastMessageId;
     room.lastMessageId = message.id;
     
     const currentUserId = room.currentRoomMemberInfo.userId;
@@ -146,8 +148,10 @@ const useRoomStore = create<useRoomStoreProps>()((set) => ({
   }),
   addMesageToRoom: (roomId, message) => set((state) => {
     let room = state.roomChats.find(r => r.id == roomId);
-    if (!room || !room.chats) return state;
-
+    if (!room ) return state;
+    if (!room.chats) {
+      room.chats = [];
+    }
     room.chats.push(message);
     room.lastMessageId = message.id;
     return {roomChats: [...state.roomChats]}
@@ -181,6 +185,7 @@ export const useRoomActions = () =>  useRoomStore(state => ({
   setRoomChats: state.setRoomChats,
   fetchRoomChats: state.fetchRoomChats,
   addRoomChat: state.addRoomChat,
+  removeRoomChat: state.removeRoomChat,
   replaceChats: state.replaceChats,
 
   addRoomMember: state.addRoomMember,

@@ -4,17 +4,18 @@ import './heading.css'
 import { IoPersonAddOutline } from 'react-icons/io5';
 import Modal from '@/components/ui/modal/modal';
 import AddGroupMember from '@/components/add-group-member/add-group-member';
-import { ModalElement, useAppModalActions, useCurrentModal } from '@/stores/modalStore';
-import { chatService } from '@/services/chatService';
-import { userService } from '@/services/userService';
-import Peer from 'peerjs';
-import { chatHub, peer, peerId, userHub } from '@/services/hubConnection';
-import {v4} from 'uuid';
+import { ModalElement, useAppModalActions } from '@/stores/modalStore';
+
+
+import { useCurrentPeer, useVideoCallActions } from '@/stores/videoCallStore';
+import { videoCallService } from '@/services/videoCallService';
 
 const Heading = () => {
     const currentRoom = useCurrentRoom();
     if (!currentRoom) return <></>;
+    const peer = useCurrentPeer();
     const [isAddGroupMemberOpen, setIsAddGroupMemberOpen] = useState(false);
+    const {setIsMakingCall, setReceiver} = useVideoCallActions();
    
   
     const {openModal, setCurrentModal} = useAppModalActions();
@@ -27,8 +28,12 @@ const Heading = () => {
 
     const handleCallVideo = async () => {    
       const receiverId = currentRoom.otherRoomMemberInfos[0]?.userId;
-      const result = await chatService.callVideo(currentRoom.id, receiverId, peerId);
-  
+      // const peer = createCurrentPeer();
+      
+      console.log('current peerId', peer.id)
+      const result = await videoCallService.callVideo(currentRoom.id, receiverId, peer.id);
+      setReceiver(currentRoom.otherRoomMemberInfos[0].user);
+      setIsMakingCall(true);
     }
    
 
@@ -62,7 +67,9 @@ const Heading = () => {
              <IoPersonAddOutline className="add-icon" />
            </button>
           )}
-          <img src="./phone.png" alt="" onClick={handleCallVideo}/>
+          <button className="btn-none" onClick={handleCallVideo}>
+            <img src="./phone.png" alt="" />
+          </button>
           <img src="./video.png" alt="" />
           <img src="./info.png" alt="" />
         </div>

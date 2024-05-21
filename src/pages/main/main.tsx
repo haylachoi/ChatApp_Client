@@ -1,12 +1,11 @@
 import Sidebar from '@/components/sidebar/sidebar'
 import { Reaction } from '@/libs/types'
-import { chatService } from '@/services/chatService'
 import { userService } from '@/services/userService'
 import { useReactionsStore } from '@/stores/reactionStore'
 import { LucideIcon, ThumbsDown, ThumbsUp } from 'lucide-react'
 import React, { useEffect } from 'react'
 import "./main.css";
-import { useCurrentRoom, useRoomActions, useRoomChats } from '@/stores/roomStore'
+import { useCurrentRoom } from '@/stores/roomStore'
 import { useCurrentUser } from '@/stores/authStore'
 import Chat from '@/components/chat/chat'
 import AppModal from '@/components/app-modal/app-modal'
@@ -14,28 +13,47 @@ import useRoomMemberEvent from '@/hooks/useRoomMemberEvent'
 import useSeenEvent from '@/hooks/useSeenEvent'
 import useReactionEvent from '@/hooks/useReactionEvent'
 import useUpdateLastMessageEvent from '@/hooks/useUpdateLastMessageEvent'
-import useConnectedUserEvent from '@/hooks/useConnectedUserEvent'
-import { chatHub, peer } from '@/services/hubConnection'
 import CallVideo from '@/components/call-video/call-video'
-import { useVideoCallActions } from '@/stores/videoCallStore'
+import { useHasIncommingCall, useIsMakingCall, useIsVideoCallAccept } from '@/stores/videoCallStore'
+import IncommingCallAlert from '@/components/incomming-call-alert/incomming-call-alert'
+import CallAlert from '@/components/call-alert/call-alert'
+import useVideoCallAcceptEvent from '@/hooks/useVideoCallAcceptEvent'
+
+import useRejectVideoCallEvent from '@/hooks/useRejectVideoCallEvent'
+import useCancelVideoCall from '@/hooks/useCancelVideoCall'
+import useCallVideoEvent from '@/hooks/useCallVideoEvent'
+import AlertModal from '@/components/ui/alert-modal/alert-modal'
+import useDeleteGroupEvent from '@/hooks/useDeleteGroupEvent'
+import useJoinRoomEvent from '@/hooks/useJoinRoomEvent'
+import useLeftRoomEvent from '@/hooks/useLeftRoomEvent'
 
 const Main = () => {
   const currentUser = useCurrentUser();
   if (!currentUser ) return <></>;
   const currentRoom = useCurrentRoom();
+  const hasIncommingCall = useHasIncommingCall();
+  const isMakingCall = useIsMakingCall();
 
-  const {setStream}= useVideoCallActions();
+  const isVideoCallAccept = useIsVideoCallAccept();
+  
   const { setReactions } = useReactionsStore();
+  useVideoCallAcceptEvent();
   useRoomMemberEvent();
   useSeenEvent();
   useReactionEvent();
   useUpdateLastMessageEvent();
-  useConnectedUserEvent();
+  useDeleteGroupEvent();
+  useJoinRoomEvent();
+  useLeftRoomEvent();
+  // useConnectedUserEvent();
+
+  useCallVideoEvent();
+  useRejectVideoCallEvent();
+  useCancelVideoCall();
   const reactionIconMapping = {
     Like: ThumbsUp,
     Hate: ThumbsDown
   }
- 
   useEffect(() => {
     userService
       .getReactions()
@@ -51,49 +69,24 @@ const Main = () => {
 
   }, [])
 
-  useEffect(() => {     
-  
-   
-    const key = chatService.onCallVideo.sub(async (roomId: string, peerId: string) => {
-    
-      // const conn = peer.connect(peerId);
-      // if (!conn) {return;}
-      // console.log('start call video', conn)
-      // conn.on('open', () => {
-      //     conn.send('hi');
-      //     conn.send('are you ok');
-      // })
-
-      var stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      console.log('peerId', peerId)
-      var call = peer.call(peerId, stream); 
-      setStream(stream);
-      // call.on('stream', (remoteStream) => {
-      //   console.log("start permssion")
-      //   // Show stream in some video/canvas element.
-      //   setStream(remoteStream);
-        
-      // });
-     
-    });
-
-    return () => {
-      chatService.onCallVideo.unsub(key);
-    }
-    
-  },[])
-
+ 
+ 
   return (
     <>
      <div className="side-bar">
       <Sidebar />
      </div>
-     <CallVideo/>
+     {/* <CallVideo/> */}
      <div className="main-content">
      {currentRoom && <Chat />}
       {/* <Detail/> */}
      </div>
      <AppModal/>
+     <AlertModal/>
+     {hasIncommingCall && !isVideoCallAccept && <IncommingCallAlert/>}
+     {isVideoCallAccept && <CallVideo/>}
+    
+     {isMakingCall && !isVideoCallAccept && <CallAlert/>}
     </>
   )
 }

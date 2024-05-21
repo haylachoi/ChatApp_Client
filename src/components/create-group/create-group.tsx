@@ -2,15 +2,16 @@ import React from 'react'
 import "./create-group.css"
 import { roomService } from '@/services/roomService';
 import { groupService } from '@/services/groupService';
+import { useCurrentUser } from '@/stores/authStore';
 
 const CreateGroup = () => {
-
+    const currentUser = useCurrentUser();
     const handleCreateGroup: React.FormEventHandler<HTMLFormElement> | undefined = (e) => {
         e.preventDefault();
-
+        if (!currentUser) return;
         const element = e.currentTarget;
         const formData = new FormData(element);
-        console.log(formData, formData.get("groupName"));
+        formData.append('groupOwnerId', currentUser.id);
         groupService.createGroup(formData).then((result) => {
 
         }).catch((error) => {
@@ -21,7 +22,7 @@ const CreateGroup = () => {
     <div className='create-group'>
       <form onSubmit={handleCreateGroup}>   
         <div className="group">
-         <input name="groupName" placeholder="Tên nhóm"/>
+         <input name="name" placeholder="Tên nhóm"/>
          <button type="submit">Tạo</button>     
         </div>
       </form>

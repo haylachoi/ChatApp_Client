@@ -34,7 +34,7 @@ httpClient.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
 
-    if (status !== 401 && tokenStatus.remainAttempt < 1) {
+    if (status !== 401 || tokenStatus.remainAttempt < 1) {
       return Promise.reject(error);
     }
     // nếu là mã 401 và vẫn còn số lần thử

@@ -1,74 +1,49 @@
-import { peer } from '@/services/hubConnection';
-import { useVideoCallStream } from '@/stores/videoCallStore';
+import {
+
+  useHasIncommingCall,
+  
+  useVideoCaller,
+  
+  useVideoReceiver,
+} from '@/stores/videoCallStore';
 import React, { useEffect, useRef } from 'react';
+import './call-video.css';
+import useMediaConnection from '@/hooks/useMediaConnection';
+import { PhoneMissed } from 'lucide-react';
 
 const CallVideo = () => {
-  const localVideoRef: React.LegacyRef<HTMLVideoElement> | undefined =
-    useRef(null);
   const remoteVideoRef: React.LegacyRef<HTMLVideoElement> | undefined =
     useRef(null);
 
-  const remoteStream1 = useVideoCallStream();
-  useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        if (!localVideoRef.current || !remoteVideoRef.current) return;
+  const hasIncommingCall = useHasIncommingCall();
+  const call = useMediaConnection();
+ 
+  const caller = useVideoCaller();
+  const receiver = useVideoReceiver();
 
-        if (remoteStream1) {
-          remoteVideoRef.current.srcObject = remoteStream1;
-        }
-
-        peer.on('call', (call) => {
-          console.log('call');
-          if (!localVideoRef.current || !remoteVideoRef.current) return;
-          localVideoRef.current.srcObject = stream;
-          
-          call.answer(stream);
-          call.on('stream', (remoteStream) => {
-            console.log('start stream');
-            if (!remoteVideoRef.current) return;
-            remoteVideoRef.current.srcObject = remoteStream;
-          });
-        });
-      });
-
-    //   peer.on('call', (call) => {
-    //   // if (!localVideoRef.current || !remoteVideoRef.current) return;
-    //   console.log('call');
-
-    //   call.on('stream', (remoteStream) => {
-    //     console.log('start stream');
-    //     if (!remoteVideoRef.current) return;
-    //     remoteVideoRef.current.srcObject = remoteStream;
-    //   });
-
-    //   call.on('error', (err) => console.log(err));
-    //   if (remoteStream1) {
-    //     localVideoRef.current!.srcObject = remoteStream1;
-    //   }
-    // });
-    // peer.on('connection', function (conn) {
-    //   conn.on('data', function (data) {
-    //     // Will print 'hi!'
-    //     console.log(data);
-    //   });
-    // });
-  }, []);
-  useEffect(() => {
-    console.log('remotestream1', remoteStream1);
-    if (remoteStream1) {
-      localVideoRef.current!.srcObject = remoteStream1;
+  const handleEndCall = () => {
+    if (call) {
+      call.close();
     }
-  }, [remoteStream1]);
+  };
+
+  useEffect(() => {
+    if (!call) return;
+
+    call.on('stream', (remoteStream) => {
+      if (!remoteVideoRef.current) return;
+      remoteVideoRef.current.srcObject = remoteStream;
+    });
+  }, [call]);
+
+
   return (
     <div className="call-video-area">
-      <h1>PeerJS Video Call</h1>
-      <div>
-        <video ref={localVideoRef} autoPlay playsInline muted />
-        <video ref={remoteVideoRef} autoPlay playsInline />
-      </div>
-      <div></div>
+      <h1 className="title">{hasIncommingCall ? caller?.fullname : receiver?.fullname}</h1>
+      <video className="remote-video" ref={remoteVideoRef} autoPlay playsInline controls />
+      <button className="end-btn btn-none" onClick={handleEndCall}>
+        <PhoneMissed className="end-btn-icon"/>
+      </button>
     </div>
   );
 };
