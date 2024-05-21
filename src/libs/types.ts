@@ -29,6 +29,7 @@ export interface MessageDetail {
     id: string;
     userId: string;
     messageId: string;
+    roomId: string;
     reactionId: string;
     user: User
 }
@@ -40,33 +41,29 @@ export interface GroupInfo {
     groupOnwerId: string;
 }
 export interface RawRoom {  
-    id: string;
-    name: string | undefined;
-    isGroup: boolean;
-    avatar: string | undefined;
-    lastMessageId: string;
-    firstMessageId: string;
+    id: string;    
+    isGroup: boolean;   
+    lastMessage?: MessageData;
+    firstMessageId?: string;
     roomMemberInfos: RoomMemberInfo[];
-    groupInfo: GroupInfo;
+    groupInfo?: GroupInfo;
 }
 export interface Room extends Omit<RawRoom, "roomMemberInfos"> {
     currentRoomMemberInfo: RoomMemberInfo;
     otherRoomMemberInfos: RoomMemberInfo[];
     chats?: MessageData[];
     previousLastMessageId?: string;  
-   
+    name?: string;
+    avatar?: string;
 }
 
-export interface RoomMemberInfo {
-    userId: string;
+export interface RoomMemberInfo {  
     roomId: string;
     user: User;
-    firstUnseenMessageId: string;
-    lastUnseenMessageId: string;
-    unseenMessageCount: string;
+    lastSeenMessageId: string;  
+    unseenMessageCount: number;
     canDisplayRoom: boolean;
     canShowNotification: boolean;
-    lastUnseenMessage: MessageData;
 }
 export interface Reaction {
     id: string;

@@ -34,12 +34,13 @@ const Chat = () => {
 
   const chatViewportRef = useRef<HTMLDivElement | null>(null);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
-  const firstUnseenMessageRef = useRef<HTMLDivElement | null>(null);
+  const lastSeenMessageRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<(HTMLDivElement | null)[]>([]);
  
 
   useObserveUnseenMessage(chatViewportRef, messagesRef);
   useReceiveMessageEvent();
+
   const isInView = useIsLastMessageInView(chatViewportRef, lastMessageRef);
   const canFetchPreviewMessage =
     currentRoom.chats == undefined ||
@@ -50,12 +51,11 @@ const Chat = () => {
 
   const canFetchNextMessage =
     currentRoom.chats == undefined ||
-    currentRoom.lastMessageId == undefined ||
+    currentRoom.lastMessage?.id == undefined ||
     currentRoom.chats.length == 0
       ? undefined
       : +currentRoom.chats[currentRoom.chats.length - 1].id <
-        +currentRoom.lastMessageId;
-
+        +currentRoom.lastMessage.id;
 
 
   const fetchPrevious = async () => {
@@ -78,6 +78,7 @@ const Chat = () => {
     );
     addNextMesasges(currentRoom.id, result.data);
   };
+  
   useEffect(() => {
     const initChat = async () => {
       try {
@@ -92,19 +93,19 @@ const Chat = () => {
         // load some message
         if (currentRoom.id && !currentRoom.chats) {
           const result = await roomService.getSomeMessages(currentRoom.id);
-          const messages = result.data;
+          const messages = result.data;     
           replaceChats(currentRoom.id, messages);
         }
 
-        if (currentRoom.currentRoomMemberInfo.firstUnseenMessageId) {
-          firstUnseenMessageRef.current?.scrollIntoView({
-            behavior: 'instant',
-            block: 'center',
-            inline: 'nearest',
-          });
-        } else if (lastMessageRef.current) {
-          lastMessageRef.current.scrollIntoView({ behavior: 'instant' });
-        }
+        // if (currentRoom.currentRoomMemberInfo.lastSeenMessageId) {
+        //   lastSeenMessageRef.current?.scrollIntoView({
+        //     behavior: 'instant',
+        //     block: 'center',
+        //     inline: 'nearest',
+        //   });
+        // } else if (lastMessageRef.current) {
+        //   lastMessageRef.current.scrollIntoView({ behavior: 'instant' });
+        // }
       } catch (error) {
         console.log(error);
       }
@@ -115,9 +116,9 @@ const Chat = () => {
  useEffect(() => {
   if(currentRoom.chats && currentRoom.chats.length > 0){
     const lastMessage = currentRoom.chats[currentRoom.chats.length-1];
-    const firstUnseenMessageId = currentRoom.currentRoomMemberInfo.firstUnseenMessageId;
+    const firstUnseenMessageId = currentRoom.currentRoomMemberInfo.lastSeenMessageId;
     if (firstUnseenMessageId) {
-      firstUnseenMessageRef.current?.scrollIntoView({ behavior: 'smooth' , block: 'nearest' });
+      lastSeenMessageRef.current?.scrollIntoView({ behavior: 'smooth' , block: 'nearest' });
     }    
     else if (isInView && lastMessage.senderId !== currentUser.id){
       lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -144,7 +145,7 @@ const Chat = () => {
               message={message}
               lastMessageRef={lastMessageRef}
               messagesRef={messagesRef}
-              firstUnseenMessageRef={firstUnseenMessageRef}
+              lastSeenMessageRef={lastSeenMessageRef}
             />
           ))}
       </InfiniteScrollable>

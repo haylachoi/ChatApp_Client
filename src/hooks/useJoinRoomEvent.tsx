@@ -12,7 +12,6 @@ const useJoinRoomEvent = () => {
   const { addRoomChat } = useRoomActions();
   useEffect(() => {
     const key = roomService.onJoinRoom.sub((rawRoom) => {
-      console.log('on create room',rawRoom);
       if (!currentUser) return;
       const room = convertRawRoomToRoom(rawRoom, currentUser.id);
       if (room) {

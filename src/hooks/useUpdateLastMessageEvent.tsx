@@ -1,10 +1,10 @@
-import { Reaction } from '@/libs/types';
+
 import { chatService } from '@/services/chatService';
 import { roomService } from '@/services/roomService';
-import { userService } from '@/services/userService';
+
 import { useRoomActions, useRoomChats } from '@/stores/roomStore';
-import { LucideIcon } from 'lucide-react';
-import React, { useEffect } from 'react'
+
+import  { useEffect } from 'react'
 
 const useUpdateLastMessageEvent = () => {
     const {updateLastMessage, updateCanDisplayRoom} = useRoomActions();

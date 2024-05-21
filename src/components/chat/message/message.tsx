@@ -3,7 +3,6 @@ import { format } from 'timeago.js';
 import './message.css';
 import { useReactionsStore } from '@/stores/reactionStore';
 import { Reaction, MessageData, User } from '@/libs/types';
-import { chatService } from '@/services/chatService';
 import ReactionMenuButton from './reaction/reaction-menu-button';
 import { ReactionIcon } from './reaction-icon/reaction-icon';
 import { useCurrentRoom } from '@/stores/roomStore';
@@ -14,14 +13,14 @@ interface MessageProps {
   message: MessageData;
   messagesRef: React.MutableRefObject<(HTMLDivElement | null)[]>;
   lastMessageRef: React.MutableRefObject<HTMLDivElement | null>;
-  firstUnseenMessageRef: React.MutableRefObject<HTMLDivElement | null>;
+  lastSeenMessageRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 const Message: React.FC<MessageProps> = ({
   index,
   message,
   messagesRef,
-  firstUnseenMessageRef,
+  lastSeenMessageRef,
   lastMessageRef,
 }) => {
   const currentRoom = useCurrentRoom();
@@ -33,7 +32,7 @@ const Message: React.FC<MessageProps> = ({
   reactions.forEach((reaction) => reactionArray.push(reaction));
 
   const messageOwner = currentRoom.otherRoomMemberInfos.find(
-    (info) => info.userId === message.senderId,
+    (info) => info.user.id === message.senderId,
   )?.user;
   const initReactionData: { id: string; users: string[] }[] = [];
   const messageReactionData = message.messageDetails.reduce((acc, md) => {
@@ -56,8 +55,8 @@ const Message: React.FC<MessageProps> = ({
     ) {
       messagesRef.current.push(el);
     }
-    if (message.id == currentRoom.currentRoomMemberInfo.firstUnseenMessageId) {
-      firstUnseenMessageRef.current = el;
+    if (message.id == currentRoom.currentRoomMemberInfo.lastSeenMessageId) {
+      lastSeenMessageRef.current = el;
     }
 
     if (currentRoom?.chats && index == currentRoom?.chats?.length - 1)
@@ -81,7 +80,15 @@ const Message: React.FC<MessageProps> = ({
       <div className="message-wrapper">
         <div className="message-content">
           {currentRoom.isGroup && (
-            <p className="message-owner" style={{"--name-color": messageOwner?.fullname.toHSL()} as React.CSSProperties}>{messageOwner?.fullname}</p>
+            <p
+              className="message-owner"
+              style={
+                {
+                  '--name-color': messageOwner?.fullname.toHSL(),
+                } as React.CSSProperties
+              }>
+              {messageOwner?.fullname}
+            </p>
           )}
           {message.isImage && <img src={message.content} alt="" />}
           {!message.isImage && (
