@@ -1,16 +1,17 @@
 import { chatService } from '@/services/chatService';
-import { useCurrentRoom, useRoomActions } from '@/stores/roomStore';
-import { useCurrentUser } from '@/stores/authStore';
-import React, { useEffect } from 'react';
+import { useCurrentChats, useCurrentRoomId,  useCurrentRoomPreviousLastMessageId, useRoomActions } from '@/stores/roomStore';
+import { useEffect } from 'react';
 
 const useReceiveMessageEvent = () => {
-  const currentRoom = useCurrentRoom();
+  const previousLastMessageId = useCurrentRoomPreviousLastMessageId();
+  const currentRoomId = useCurrentRoomId();
+  const currentChats = useCurrentChats();
+  
   const { addMesageToRoom } = useRoomActions();
   useEffect(() => {
-    if (!currentRoom) return;
     const key = chatService.onReceiveMessage.sub((message) => {
-      if (message.roomId === currentRoom.id) {
-        if (!currentRoom.chats || currentRoom.chats.length < 1 || currentRoom.chats[currentRoom.chats.length -1].id === currentRoom.previousLastMessageId) {
+      if (message.roomId === currentRoomId) {
+        if (!currentChats || currentChats.length < 1 || currentChats[currentChats.length -1].id === previousLastMessageId) {
           addMesageToRoom(message.roomId, message);
         }
       }  
@@ -19,7 +20,7 @@ const useReceiveMessageEvent = () => {
     return () => {
       chatService.onReceiveMessage.unsub(key);
     };
-  }, [currentRoom]);
+  }, [previousLastMessageId, currentRoomId, currentChats]);
 };
 
 export default useReceiveMessageEvent;

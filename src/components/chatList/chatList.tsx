@@ -5,24 +5,19 @@ import './chatList.css';
 import React from 'react';
 
 import { useCurrentUser } from '@/stores/authStore';
-import {
-  useCurrentRoom,
-  useRoomActions,
-  useRoomChats,
-} from '@/stores/roomStore';
+import { useCurrentRoomId, useRoomActions, useRooms } from '@/stores/roomStore';
 import { ModalElement, useAppModalActions } from '@/stores/modalStore';
 import useJoinRoomEvent from '@/hooks/useJoinRoomEvent';
-import { Room } from '@/libs/types';
+import { Profile, Room } from '@/libs/types';
 
 const ChatList = () => {
-  const currentRoom = useCurrentRoom();
-  const currentUser = useCurrentUser();
-  if (!currentUser || !currentUser.id) return <></>;
+  const currentRoomId = useCurrentRoomId() as string;
+  const currentUser = useCurrentUser() as Profile;
 
   const { setCurrentModal, openModal } = useAppModalActions();
   const [input, setInput] = useState('');
 
-  const roomChats = useRoomChats();
+  const roomChats = useRooms();
   const { fetchRoomChats, setCurrentRoom } = useRoomActions();
 
   let filtedRooms: Room[] = useMemo(() => {
@@ -35,7 +30,7 @@ const ChatList = () => {
           .includes(input.toLowerCase());
       }
     });
-  
+
     filter.sort((a, b) => {
       if (a.lastMessage && b.lastMessage) {
         return +b.lastMessage.id - +a.lastMessage.id;
@@ -43,9 +38,8 @@ const ChatList = () => {
       if (a.lastMessage) return -1;
       return 1;
     });
-    console.log(filter);
     return filter;
-  }, [roomChats])
+  }, [roomChats]);
 
   const handleOpenAddUser = () => {
     setCurrentModal(ModalElement.addUser);
@@ -91,7 +85,7 @@ const ChatList = () => {
           return (
             <div
               className={`item ${
-                currentRoom?.id == roomChat.id ? 'room-current' : ''
+                currentRoomId == roomChat.id ? 'room-current' : ''
               }`}
               key={roomChat.id}
               onClick={() => {
@@ -106,29 +100,32 @@ const ChatList = () => {
                 <span>{roomChat.name}</span>
                 {roomChat.lastMessage && (
                   <div className="room-additional-info">
-                  <span className="message-unseen-content">
-                    {` ${
-                      roomChat.lastMessage?.senderId == currentUser.id
-                        ? 'Bạn'
-                        : roomChat.otherRoomMemberInfos.find(rm => rm.user.id === roomChat.lastMessage?.senderId ?? 0)?.user.fullname
-                    }: ${
-                      roomChat.lastMessage?.isImage ? (
+                    <span className="message-unseen-content">
+                      {` ${
+                        roomChat.lastMessage?.senderId == currentUser.id
+                          ? 'Bạn'
+                          : roomChat.otherRoomMemberInfos.find(
+                              (rm) =>
+                                rm.user.id === roomChat.lastMessage?.senderId ??
+                                0,
+                            )?.user.fullname
+                      }:                         
+                    `}
+                      {roomChat.lastMessage?.isImage ? (
                         <span className="message-img-icon">Hình ảnh</span>
                       ) : (
                         roomChat.lastMessage?.content
-                      )
-                    }                         
-                    `}                
-                  </span>
-                  {roomChat.currentRoomMemberInfo.unseenMessageCount > 0 && (
-                    <span
-                      className={`${
-                        roomChat.lastMessage ? 'message-unseen' : ''
-                      }`}>
-                      {`(${roomChat.currentRoomMemberInfo.unseenMessageCount})`}
+                      )}
                     </span>
-                  )}
-                </div>
+                    {roomChat.currentRoomMemberInfo.unseenMessageCount > 0 && (
+                      <span
+                        className={`${
+                          roomChat.lastMessage ? 'message-unseen' : ''
+                        }`}>
+                        {`(${roomChat.currentRoomMemberInfo.unseenMessageCount})`}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

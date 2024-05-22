@@ -5,10 +5,11 @@ import { Camera, Check, LogOut, Pencil, X } from 'lucide-react';
 import { useAppModalActions } from '@/stores/modalStore';
 import { userService } from '@/services/userService';
 import jsonpatch from 'fast-json-patch';
+import { Profile as ProfileType } from '@/libs/types';
 
 const Profile = () => {
-  const currentUser = useCurrentUser();
-  if (!currentUser) return <></>;
+  const currentUser = useCurrentUser() as ProfileType;
+  
   const { setCurrentUser } = useAuthActions();
   const fullNameRef: React.LegacyRef<HTMLInputElement> | undefined =
     useRef(null);

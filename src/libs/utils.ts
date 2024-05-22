@@ -29,8 +29,8 @@ export const convertRawRoomToRoom = (rawRoom: RawRoom, currentId: string) => {
         room.name = room.groupInfo?.name;
         room.avatar = room.groupInfo?.avatar;
     } else{
-        room.name = room.currentRoomMemberInfo.user.fullname;
-        room.avatar = room.currentRoomMemberInfo.user.avatar;
+        room.name = room.otherRoomMemberInfos[0].user.fullname;
+        room.avatar = room.otherRoomMemberInfos[0].user.avatar;
     }
     return room;
 }

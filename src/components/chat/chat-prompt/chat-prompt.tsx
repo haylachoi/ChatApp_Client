@@ -1,18 +1,18 @@
 import { chatService } from '@/services/chatService';
-import { useCurrentRoom } from '@/stores/roomStore';
 import React, { KeyboardEventHandler, useRef, useState } from 'react';
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 import './chat-prompt.css';
+import { useCurrentRoomId } from '@/stores/roomStore';
 
 const ChatPrompt = () => {
-  const currentRoom = useCurrentRoom();
-  if (!currentRoom) return <></>;
+  const currentRoomId = useCurrentRoomId() as string;
+
   const isReceiverBlocked = false;
   const isCurrentUserBlocked = false;
   const [open, setOpen] = useState(false);
 
- const inputRef: React.LegacyRef<HTMLInputElement> | undefined = useRef(null);
+  const inputRef: React.LegacyRef<HTMLInputElement> | undefined = useRef(null);
   const handleImg: React.ChangeEventHandler<HTMLInputElement> | undefined = (
     e,
   ) => {
@@ -20,7 +20,7 @@ const ChatPrompt = () => {
     if (!files) return;
 
     chatService
-      .sendImageMessage(files, currentRoom.id)
+      .sendImageMessage(files, currentRoomId)
       .then((result) => {})
       .catch((error: any) => {
         console.log(error);
@@ -35,7 +35,7 @@ const ChatPrompt = () => {
   };
   const handleEmoji = (e: any) => {
     if (inputRef.current) {
-      inputRef.current.value = inputRef.current?.value + e.native
+      inputRef.current.value = inputRef.current?.value + e.native;
     }
     setOpen(false);
     inputRef.current?.focus();
@@ -46,7 +46,7 @@ const ChatPrompt = () => {
       return;
     }
     try {
-      await chatService.sendMessage(currentRoom.id, text);
+      await chatService.sendMessage(currentRoomId, text);
     } catch (err) {
       console.log(err);
     } finally {
@@ -89,9 +89,15 @@ const ChatPrompt = () => {
           onClick={() => setOpen((prev) => !prev)}
         />
         <div className="picker">
-         
           {open && (
-            <Picker data={data} onEmojiSelect={handleEmoji} onClickOutside={() => {setOpen(false); setOpen(false);}}/>
+            <Picker
+              data={data}
+              onEmojiSelect={handleEmoji}
+              onClickOutside={() => {
+                setOpen(false);
+                setOpen(false);
+              }}
+            />
           )}
         </div>
       </div>
@@ -100,7 +106,7 @@ const ChatPrompt = () => {
         onClick={handleSend}
         disabled={isCurrentUserBlocked || isReceiverBlocked}>
         Send
-      </button>  
+      </button>
     </div>
   );
 };

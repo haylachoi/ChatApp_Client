@@ -1,9 +1,6 @@
 import {
-
   useHasIncommingCall,
-  
   useVideoCaller,
-  
   useVideoReceiver,
 } from '@/stores/videoCallStore';
 import React, { useEffect, useRef } from 'react';
@@ -17,7 +14,7 @@ const CallVideo = () => {
 
   const hasIncommingCall = useHasIncommingCall();
   const call = useMediaConnection();
- 
+
   const caller = useVideoCaller();
   const receiver = useVideoReceiver();
 
@@ -36,13 +33,20 @@ const CallVideo = () => {
     });
   }, [call]);
 
-
   return (
     <div className="call-video-area">
-      <h1 className="title">{hasIncommingCall ? caller?.fullname : receiver?.fullname}</h1>
-      <video className="remote-video" ref={remoteVideoRef} autoPlay playsInline controls />
+      <h1 className="title">
+        {hasIncommingCall ? caller?.fullname : receiver?.fullname}
+      </h1>
+      <video
+        className="remote-video"
+        ref={remoteVideoRef}
+        autoPlay
+        playsInline
+        controls
+      />
       <button className="end-btn btn-none" onClick={handleEndCall}>
-        <PhoneMissed className="end-btn-icon"/>
+        <PhoneMissed className="end-btn-icon" />
       </button>
     </div>
   );

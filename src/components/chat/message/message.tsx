@@ -2,11 +2,11 @@ import React from 'react';
 import { format } from 'timeago.js';
 import './message.css';
 import { useReactionsStore } from '@/stores/reactionStore';
-import { Reaction, MessageData, User } from '@/libs/types';
+import { Reaction, MessageData, User, Profile } from '@/libs/types';
 import ReactionMenuButton from './reaction/reaction-menu-button';
 import { ReactionIcon } from './reaction-icon/reaction-icon';
-import { useCurrentRoom } from '@/stores/roomStore';
 import { useCurrentUser } from '@/stores/authStore';
+import { RoomMemberDetail, useCurrentChats, useCurrentRoomInfo, useCurrentRoomMembers, useIsCurrentRoomGroup } from '@/stores/roomStore';
 
 interface MessageProps {
   index: number;
@@ -23,15 +23,16 @@ const Message: React.FC<MessageProps> = ({
   lastSeenMessageRef,
   lastMessageRef,
 }) => {
-  const currentRoom = useCurrentRoom();
-  const currentUser = useCurrentUser();
-  if (!currentRoom || !currentUser) return <></>;
+  const {currentMember, otherMembers} = useCurrentRoomMembers() as RoomMemberDetail;
+  const currentUser = useCurrentUser() as Profile;
+  const currentChats = useCurrentChats() as MessageData[];
+  const isGroup = useIsCurrentRoomGroup() as boolean;
 
   const { reactions } = useReactionsStore();
   const reactionArray: Reaction[] = [];
   reactions.forEach((reaction) => reactionArray.push(reaction));
 
-  const messageOwner = currentRoom.otherRoomMemberInfos.find(
+  const messageOwner = otherMembers.find(
     (info) => info.user.id === message.senderId,
   )?.user;
   const initReactionData: { id: string; users: string[] }[] = [];
@@ -55,11 +56,11 @@ const Message: React.FC<MessageProps> = ({
     ) {
       messagesRef.current.push(el);
     }
-    if (message.id == currentRoom.currentRoomMemberInfo.lastSeenMessageId) {
+    if (message.id ==currentMember.lastSeenMessageId) {
       lastSeenMessageRef.current = el;
     }
 
-    if (currentRoom?.chats && index == currentRoom?.chats?.length - 1)
+    if (currentChats && index == currentChats?.length - 1)
       lastMessageRef.current = el;
   };
   return (
@@ -79,7 +80,7 @@ const Message: React.FC<MessageProps> = ({
       )}
       <div className="message-wrapper">
         <div className="message-content">
-          {currentRoom.isGroup && (
+          {isGroup && (
             <p
               className="message-owner"
               style={

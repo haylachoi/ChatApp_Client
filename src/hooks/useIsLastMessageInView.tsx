@@ -1,9 +1,10 @@
-import { useCurrentRoom } from '@/stores/roomStore';
+
+import { useCurrentChats } from '@/stores/roomStore';
 import React, { useEffect, useState } from 'react'
 
 const useIsLastMessageInView = (chatViewportRef: React.MutableRefObject<HTMLDivElement | null>, lastMessageRef: React.MutableRefObject<HTMLDivElement | null>) => {
     const [isInview, setIsInview] = useState(true);
-    const currentRoom = useCurrentRoom();
+    const currentChats = useCurrentChats();
     useEffect(() => {
         const observer = new IntersectionObserver(
           ([entry]) => {
@@ -25,7 +26,7 @@ const useIsLastMessageInView = (chatViewportRef: React.MutableRefObject<HTMLDivE
             observer.unobserve(lastMessageRef.current);
           }
         };
-      }, [currentRoom?.chats?.length]);
+      }, [currentChats?.length]);
 
     return isInview;
 }

@@ -1,6 +1,6 @@
 import { chatService } from '@/services/chatService';
 import { useRoomActions } from '@/stores/roomStore';
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 
 const useReactionEvent = () => {
     const {updateReactionMessage} = useRoomActions();

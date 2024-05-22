@@ -1,5 +1,5 @@
 import { userService } from '@/services/userService'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 
 const useConnectedUserEvent = () => {
     useEffect(() => { 

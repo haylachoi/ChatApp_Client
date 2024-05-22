@@ -1,6 +1,6 @@
 import { videoCallService } from '@/services/videoCallService'
 import { useCallerPeerId, useVideoCallActions } from '@/stores/videoCallStore'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 
 const useCancelVideoCall = () => {
  const callerPeerId = useCallerPeerId();

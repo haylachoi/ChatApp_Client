@@ -1,6 +1,6 @@
 import { videoCallService } from '@/services/videoCallService';
 import { useVideoCallActions } from '@/stores/videoCallStore';
-import React, { useEffect } from 'react'
+import  { useEffect } from 'react'
 import useIsTabActive from './useIsTabActive';
 
 const useCallVideoEvent = () => {

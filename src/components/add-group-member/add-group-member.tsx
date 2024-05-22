@@ -1,18 +1,15 @@
-import { User } from '@/libs/types';
+import {  User } from '@/libs/types';
 import { userService } from '@/services/userService';
-import { useCurrentUser } from '@/stores/authStore';
 import React, { FormEvent, useState } from 'react'
 import './add-group-member.css'
-import { useCurrentRoom } from '@/stores/roomStore';
 import { groupService } from '@/services/groupService';
+import { useCurrentRoomId } from '@/stores/roomStore';
 
 
 const AddGroupMember = () => {
-    const [users, setUsers] = useState<User[]>([]);
-
-  const currentUser = useCurrentUser();
-  const currentRoom = useCurrentRoom();
-  if (!currentRoom || !currentUser) return <></>;
+  const [users, setUsers] = useState<User[]>([]);
+  const currentRoomId = useCurrentRoomId() as string;
+ 
 
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
@@ -20,7 +17,7 @@ const AddGroupMember = () => {
     const searchTerm = formData.get("searchTerm") as string;
     
     try {
-      const result = await userService.searchUserNotInRoom(currentRoom.id, searchTerm);
+      const result = await userService.searchUserNotInRoom(currentRoomId, searchTerm);
       if (result.isSuccess) {
         setUsers(result.data);
       }
@@ -31,7 +28,7 @@ const AddGroupMember = () => {
 
   const handleAdd = async (id: string) => {
     try {
-       const result = await groupService.addGroupMember(currentRoom.id, id);
+       const result = await groupService.addGroupMember(currentRoomId, id);
        if (result.isSuccess){
         setUsers(pre => pre.filter(u => u.id !== id));
        }

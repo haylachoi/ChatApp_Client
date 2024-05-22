@@ -2,7 +2,7 @@ import { convertRawRoomToRoom } from '@/libs/utils';
 import { chatService } from '@/services/chatService';
 import { useRoomActions } from '@/stores/roomStore';
 import { useCurrentUser } from '@/stores/authStore';
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 
 const useSeenEvent = () => {
     const currentUser = useCurrentUser();

@@ -5,7 +5,7 @@ import { useReactionsStore } from '@/stores/reactionStore'
 import { LucideIcon, ThumbsDown, ThumbsUp } from 'lucide-react'
 import React, { useEffect } from 'react'
 import "./main.css";
-import { useCurrentRoom } from '@/stores/roomStore'
+
 import { useCurrentUser } from '@/stores/authStore'
 import Chat from '@/components/chat/chat'
 import AppModal from '@/components/app-modal/app-modal'
@@ -26,11 +26,12 @@ import AlertModal from '@/components/ui/alert-modal/alert-modal'
 import useDeleteGroupEvent from '@/hooks/useDeleteGroupEvent'
 import useJoinRoomEvent from '@/hooks/useJoinRoomEvent'
 import useLeftRoomEvent from '@/hooks/useLeftRoomEvent'
+import { useCurrentRoomId } from '@/stores/roomStore'
 
 const Main = () => {
   const currentUser = useCurrentUser();
   if (!currentUser ) return <></>;
-  const currentRoom = useCurrentRoom();
+  const currentRoomId = useCurrentRoomId();
   const hasIncommingCall = useHasIncommingCall();
   const isMakingCall = useIsMakingCall();
 
@@ -78,7 +79,7 @@ const Main = () => {
      </div>
      {/* <CallVideo/> */}
      <div className="main-content">
-     {currentRoom && <Chat />}
+     {currentRoomId && <Chat />}
       {/* <Detail/> */}
      </div>
      <AppModal/>

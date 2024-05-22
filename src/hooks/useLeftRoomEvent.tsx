@@ -2,7 +2,7 @@
 import { roomService } from "@/services/roomService";
 import { useAlertModalActions } from "@/stores/alertModalStore";
 import { useAppModalActions } from "@/stores/modalStore";
-import { useCurrentRoom, useRoomActions } from "@/stores/roomStore";
+import { useCurrentRoomId, useRoomActions } from "@/stores/roomStore";
 import { useEffect } from "react";
 
 
@@ -10,11 +10,11 @@ const useLeftRoomEvent = () => {
   const {removeRoomChat, setCurrentRoom} = useRoomActions();
   const {closeModal, setCurrentModal} = useAppModalActions();
   const {onClose} = useAlertModalActions()
-  const currentRoom = useCurrentRoom();
+  const currentRoomId = useCurrentRoomId();
   
   useEffect(() => {
     const key = roomService.onLeftRoom.sub((roomId) => {
-      if (currentRoom && currentRoom.id === roomId) {
+      if (currentRoomId === roomId) {
         onClose();
         setCurrentModal(undefined);
         closeModal();
@@ -26,7 +26,7 @@ const useLeftRoomEvent = () => {
     return () => {
       roomService.onLeftRoom.unsub(key);
     };
-  }, [currentRoom]);
+  }, [currentRoomId]);
 }
 
 export default useLeftRoomEvent

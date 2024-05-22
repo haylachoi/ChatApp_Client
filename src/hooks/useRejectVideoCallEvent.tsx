@@ -1,6 +1,6 @@
 import { videoCallService } from '@/services/videoCallService'
 import { useCurrentPeer, useIsVideoCallAccept, useVideoCallActions } from '@/stores/videoCallStore'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 
 const useRejectVideoCallEvent = () => {
  const peer = useCurrentPeer();

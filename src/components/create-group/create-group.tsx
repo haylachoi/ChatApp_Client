@@ -1,14 +1,13 @@
 import React from 'react'
 import "./create-group.css"
-import { roomService } from '@/services/roomService';
 import { groupService } from '@/services/groupService';
 import { useCurrentUser } from '@/stores/authStore';
+import { Profile } from '@/libs/types';
 
 const CreateGroup = () => {
-    const currentUser = useCurrentUser();
+    const currentUser = useCurrentUser() as Profile;
     const handleCreateGroup: React.FormEventHandler<HTMLFormElement> | undefined = (e) => {
-        e.preventDefault();
-        if (!currentUser) return;
+        e.preventDefault();      
         const element = e.currentTarget;
         const formData = new FormData(element);
         formData.append('groupOwnerId', currentUser.id);

@@ -8,21 +8,22 @@ import React from 'react';
 import { roomService } from '@/services/roomService';
 import Message from './message/message';
 import { useCurrentUser } from '@/stores/authStore';
-import { useCurrentRoom, useRoomActions } from '@/stores/roomStore';
+import { RoomInfo, RoomMemberDetail, RoomStatus, useCurrentChats, useCurrentRoomId, useCurrentRoomInfo, useCurrentRoomMembers, useCurrentRoomStatus, useRoomActions } from '@/stores/roomStore';
 import Heading from './heading/heading';
 import InfiniteScrollable from '../ui/infinite-scrollable/infinite-scrollable';
 import ChatPrompt from './chat-prompt/chat-prompt';
 import useObserveUnseenMessage from '@/hooks/useObserveUnseenMessage';
 import useReceiveMessageEvent from '@/hooks/useReceiveMessageEvent';
 import useIsLastMessageInView from '@/hooks/useIsLastMessageInView';
+import { MessageData, Profile, RoomMemberInfo } from '@/libs/types';
 
 const Chat = () => {
-  const currentUser = useCurrentUser();
-  const currentRoom = useCurrentRoom();
-  
-  if (!currentRoom || !currentUser) {
-    return <></>;
-  }
+  const currentUser = useCurrentUser() as Profile;
+  const currentChats = useCurrentChats() as MessageData[];
+  const currentRoomStatus = useCurrentRoomStatus() as RoomStatus;
+  const currentRoomInfo = useCurrentRoomInfo() as RoomInfo;
+  const currentRoomId = useCurrentRoomId() as string;
+  const currentRoomMembers = useCurrentRoomMembers() as RoomMemberDetail;
 
   const {
     replaceChats,
@@ -43,58 +44,58 @@ const Chat = () => {
 
   const isInView = useIsLastMessageInView(chatViewportRef, lastMessageRef);
   const canFetchPreviewMessage =
-    currentRoom.chats == undefined ||
-    currentRoom.firstMessageId == undefined ||
-    currentRoom.chats.length == 0
+    currentChats == undefined ||
+    currentRoomStatus.firstMessageId == undefined ||
+    currentChats.length == 0
       ? undefined
-      : +currentRoom.chats[0].id > +currentRoom.firstMessageId;
+      : +currentChats[0].id > +currentRoomStatus.firstMessageId;
 
   const canFetchNextMessage =
-    currentRoom.chats == undefined ||
-    currentRoom.lastMessage?.id == undefined ||
-    currentRoom.chats.length == 0
+    currentChats == undefined ||
+    currentRoomStatus.lastMessage?.id == undefined ||
+    currentChats.length == 0
       ? undefined
-      : +currentRoom.chats[currentRoom.chats.length - 1].id <
-        +currentRoom.lastMessage.id;
+      : +currentChats[currentChats.length - 1].id <
+        +currentRoomStatus.lastMessage.id;
 
 
   const fetchPrevious = async () => {
-    if (!currentRoom || !currentRoom.chats) return;
+    if (!currentChats) return;
 
     var result = await roomService.getPreviousMessages(
-      currentRoom.id,
-      currentRoom.chats[0].id,
+      currentRoomId,
+      currentChats[0].id,
     );
     if (result.isSuccess) {
-      addPreviousMesasges(currentRoom.id, result.data);
+      addPreviousMesasges(currentRoomId, result.data);
     }
   };
   const fetchNext = async () => {
-    if (!currentRoom || !currentRoom.chats) return;
+    if (!currentChats) return;
 
     var result = await roomService.getNextMessages(
-      currentRoom.id,
-      currentRoom.chats[currentRoom.chats.length - 1].id,
+      currentRoomId,
+      currentChats[currentChats.length - 1].id,
     );
-    addNextMesasges(currentRoom.id, result.data);
+    addNextMesasges(currentRoomId, result.data);
   };
   
   useEffect(() => {
     const initChat = async () => {
       try {
         // update first message id
-        if (currentRoom.firstMessageId === undefined) {
-          const result = await roomService.getFirstMessage(currentRoom.id);
+        if (currentRoomStatus.firstMessageId === undefined) {
+          const result = await roomService.getFirstMessage(currentRoomId);
           const message = result.data;
           if (message) {
-            updateFirstMessageId(currentRoom.id, message.id);
+            updateFirstMessageId(currentRoomId, message.id);
           }
         }
         // load some message
-        if (currentRoom.id && !currentRoom.chats) {
-          const result = await roomService.getSomeMessages(currentRoom.id);
+        if (currentRoomId && !currentChats) {
+          const result = await roomService.getSomeMessages(currentRoomId);
           const messages = result.data;     
-          replaceChats(currentRoom.id, messages);
+          replaceChats(currentRoomId, messages);
         }
 
         // if (currentRoom.currentRoomMemberInfo.lastSeenMessageId) {
@@ -111,13 +112,13 @@ const Chat = () => {
       }
     };
     initChat();
-  }, [currentRoom]);
+  }, [currentRoomStatus, currentRoomInfo]);
 
  useEffect(() => {
-  if(currentRoom.chats && currentRoom.chats.length > 0){
-    const lastMessage = currentRoom.chats[currentRoom.chats.length-1];
-    const firstUnseenMessageId = currentRoom.currentRoomMemberInfo.lastSeenMessageId;
-    if (firstUnseenMessageId) {
+  if(currentChats && currentChats.length > 0){
+    const lastMessage = currentChats[currentChats.length-1];
+    const lastSeenMessageId = currentRoomMembers?.currentMember.lastSeenMessageId;
+    if (lastSeenMessageId) {
       lastSeenMessageRef.current?.scrollIntoView({ behavior: 'smooth' , block: 'nearest' });
     }    
     else if (isInView && lastMessage.senderId !== currentUser.id){
@@ -127,7 +128,7 @@ const Chat = () => {
       lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }
- },[currentRoom.chats?.length])
+ },[currentChats?.length])
   return (
     <div className="chat">
       <Heading />      
@@ -137,8 +138,8 @@ const Chat = () => {
         fetchPrevious={fetchPrevious}
         canFetchNext={!!canFetchNextMessage}
         canFetchPrevious={!!canFetchPreviewMessage}>
-        {currentRoom.chats &&
-          currentRoom.chats.map((message, index) => (
+        {currentChats &&
+          currentChats.map((message, index) => (
             <Message
               key={message.id}
               index={index}

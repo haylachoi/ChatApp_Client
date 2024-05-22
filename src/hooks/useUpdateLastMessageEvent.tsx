@@ -1,14 +1,11 @@
-
 import { chatService } from '@/services/chatService';
 import { roomService } from '@/services/roomService';
-
-import { useRoomActions, useRoomChats } from '@/stores/roomStore';
-
+import { useRoomActions, useRooms } from '@/stores/roomStore';
 import  { useEffect } from 'react'
 
 const useUpdateLastMessageEvent = () => {
     const {updateLastMessage, updateCanDisplayRoom} = useRoomActions();
-    const roomChats = useRoomChats();
+    const roomChats = useRooms();
     useEffect(() => {       
         const key = chatService.onReceiveMessage.sub((message) => {    
           updateLastMessage(message.roomId, message)

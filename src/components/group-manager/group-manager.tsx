@@ -1,23 +1,16 @@
 import React, { useEffect } from 'react'
 import "./group-manager.css"
 import { FormEvent, useState } from "react";
-import { useCurrentUser } from "@/stores/authStore";
-import { useCurrentRoom, useRoomActions } from '@/stores/roomStore';
 import { groupService } from '@/services/groupService';
 import { useAlertModal } from '@/stores/alertModalStore';
-import { useAppModalActions } from '@/stores/modalStore';
+import { useCurrentRoomMembers, useCurrentRoomId, RoomMemberDetail } from '@/stores/roomStore';
+
 
 const GroupManager = () => {
-  const currentRoom = useCurrentRoom();
-  const currentUser = useCurrentUser();
-  const {closeModal} = useAppModalActions();
-  if (!currentRoom || !currentUser) {
-    closeModal();
-  return <></>;
-  }
-
+  const {otherMembers} = useCurrentRoomMembers() as RoomMemberDetail;
+  const currentRoomId = useCurrentRoomId() as string;
   const {onOpen, setOnOk} = useAlertModal();
-  const [users, setUsers] = useState(currentRoom.otherRoomMemberInfos.map((info) => info.user));
+  const [users, setUsers] = useState(otherMembers.map((info) => info.user));
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
@@ -25,11 +18,11 @@ const GroupManager = () => {
     const searchTerm = formData.get("searchTerm") as string;
     if(!searchTerm) return;
    
-    setUsers(currentRoom.otherRoomMemberInfos.filter((info) => info.user.fullname.toLowerCase().includes(searchTerm.toLowerCase())).map((info) => info.user));
+    setUsers(otherMembers.filter((info) => info.user.fullname.toLowerCase().includes(searchTerm.toLowerCase())).map((info) => info.user));
   };
 
   const handleDeleteGroup = () => {
-    setOnOk(() => groupService.deleteGroup(currentRoom.id));
+    setOnOk(() => groupService.deleteGroup(currentRoomId));
     onOpen();
   }
   const handleSetGroupOwner = (id: string) => {
@@ -37,16 +30,16 @@ const GroupManager = () => {
   }
   const handleKick = async (id: string) => {
     try {
-        var result = groupService.removeGroupMember(currentRoom.id, id);        
+        var result = groupService.removeGroupMember(currentRoomId, id);        
     } catch (error) {
         console.log(error);
     }
   }
 
   useEffect(() => {
-    const newUsers = currentRoom?.otherRoomMemberInfos.map((info) => info.user);
+    const newUsers = otherMembers.map((info) => info.user);
     setUsers(newUsers);
-  }, [currentRoom.otherRoomMemberInfos.length])
+  }, [otherMembers.length])
   return (
     <div className="group-manager">
       <button onClick={handleDeleteGroup}>Xóa nhóm</button>

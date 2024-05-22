@@ -1,6 +1,6 @@
 import { useCurrentPeer, useHasIncommingCall, useCallerPeerId, useVideoCallActions } from '@/stores/videoCallStore';
 import { MediaConnection } from 'peerjs';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const useMediaConnection = () => {
   const [localCall, setLocalCall] = useState<MediaConnection>();
@@ -23,12 +23,11 @@ const useMediaConnection = () => {
       videoElement.autoplay = true;
       videoElement.oncanplay = () => {
         if (!callerPeerId) return;
-        const stream = videoElement.captureStream({ video: true, audio: true });
-        // console.log('current peerId', peer.id);
-        // console.log('caller peerId', callerPeerId);
-        var call = peer.call(callerPeerId, stream);      
+        const stream = videoElement.captureStream({ video: true, audio: true });      
+        var call = peer.call(callerPeerId, stream);     
+        if (!call) return; 
         setLocalCall(call);
-        setStream(stream);
+        setStream(stream);       
         call.on('close',() => {
           videoElement.pause();
         })

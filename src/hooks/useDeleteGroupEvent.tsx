@@ -1,17 +1,17 @@
 import { groupService } from '@/services/groupService';
 import { useAlertModalActions } from '@/stores/alertModalStore';
 import { useAppModalActions } from '@/stores/modalStore';
-import { useCurrentRoom, useRoomActions } from '@/stores/roomStore'
+import { useCurrentRoomId, useRoomActions } from '@/stores/roomStore'
 import { useEffect } from 'react'
 
 const useDeleteGroupEvent = () => {
   const {removeRoomChat, setCurrentRoom} = useRoomActions();
   const {closeModal, setCurrentModal} = useAppModalActions();
   const {onClose} = useAlertModalActions()
-  const currentRoom = useCurrentRoom();
+  const currentRoomId = useCurrentRoomId();
   useEffect(() => {
   const key = groupService.onDeleteGroup.sub((roomId) => {
-    if (currentRoom && currentRoom.id === roomId) {
+    if ( currentRoomId === roomId) {
       onClose();
       setCurrentModal(undefined);
       closeModal();
@@ -23,7 +23,7 @@ const useDeleteGroupEvent = () => {
   return () => {
     groupService.onDeleteGroup.unsub(key);
   }
- },[currentRoom])
+ },[currentRoomId])
 }
 
 export default useDeleteGroupEvent
