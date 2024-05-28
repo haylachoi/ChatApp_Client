@@ -25,9 +25,8 @@
   .reaction-system-bar {
     position: absolute;
     top: 0;
-    right: 0;
-    transform: translate(50%, -100%);
-    /* display: none; */
+    left: 50%;
+    transform: translate(-50%, -120%);
     display: flex;
     border-radius: 9999px;
     gap: 10px;
@@ -35,7 +34,7 @@
     background-color: white;
     visibility: 0.2;
     opacity: 0.3;
-    transition: padding 0.2s, opacity 0.2s;
+    transition: padding 0.2s, opacity 0.2s, visibility 0.2s;
    
     button {
         width: 25px;
@@ -61,7 +60,6 @@
 
   &:hover {
     .reaction-system-bar {    
-      /* display: flex; */
       visibility: visible;
       opacity: 1;
       padding: 5px 25px;

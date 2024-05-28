@@ -3,15 +3,14 @@ import { Ban, LucideIcon } from "lucide-react";
 import React from "react";
 
 export const ReactionIcon = ({id}: {id: string | undefined}) => {
-    const { reactions } = useReactionsStore();
+    const {reactionArray, reactionMap} = useReactionsStore( (state) => state.reactions);
 
   let Icon: LucideIcon;
   if (!id) {
-    Icon = reactions.entries().next().value[1].icon;
+    Icon = reactionArray[0].icon;
   } else {
-    Icon = reactions.get(id)?.icon ?? Ban;
+    Icon = reactionMap.get(id)?.icon ?? Ban;
   }
-  
   
   return (
     <Icon className="reaction-icon">      

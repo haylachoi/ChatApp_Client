@@ -1,10 +1,9 @@
 import { generatePublisher } from '@/libs/utils';
 import { chatHub, clientHub } from './hubConnection';
-import { HubResponse, MessageData, MessageDetail, RawRoom, User } from '@/libs/types';
+import { MessageData, MessageDetail, RawRoom, User } from '@/libs/types';
 import { REST_SEGMENT } from '@/libs/constant';
-import { getAccessToken } from './authService';
 import { httpClient } from '@/libs/httpClient';
-import Peer from 'peerjs';
+
 
 const connection = chatHub;
 const eventListener = clientHub;
@@ -34,8 +33,8 @@ const sendImageMessage = async (files: FileList, roomId: string): Promise<void> 
   await httpClient.post(pathname, formData);
 };
 
-const sendMessage = async (roomId: string, message: string) => {
-  return connection.send('SendMessage', roomId, message);
+const sendMessage = async (roomId: string, content: string, quoteId: string | undefined) => {
+  return connection.send('SendMessage', roomId, content, quoteId);
 };
 
 const updateIsReaded = async (messageId: string) => {
@@ -54,19 +53,14 @@ const onUpdateReactionMessage = generatePublisher(
   subscribers.updateReactionMessage,
 );
 const onReceiveMessage = generatePublisher(subscribers.receiveMessage);
-const onUpdateIsReaded = generatePublisher(subscribers.updateSeenMessage);
 
 eventListener.on('ReceiveMessage', (message: MessageData) => {
+  // const message = convertRawMessageToMessage(rawMessage) as MessageData;
   subscribers.receiveMessage.forEach((eventHandler) => {
-    eventHandler( message);
+    eventHandler(message);
   });
 });
 
-eventListener.on('UpdateIsReaded', (messageDetail: MessageDetail, rawRoom: RawRoom) => {
-  subscribers.updateSeenMessage.forEach((eventHandler) => {
-    eventHandler(messageDetail, rawRoom);
-  });
-});
 
 eventListener.on('UpdateReactionMessage', (roomId: string, messageDetail: MessageDetail) => {
   subscribers.updateReactionMessage.forEach((eventHandler) => {
@@ -82,6 +76,5 @@ export const chatService = {
   updateReactionMessage,
  
   onReceiveMessage,
-  onUpdateIsReaded,
   onUpdateReactionMessage,
 };

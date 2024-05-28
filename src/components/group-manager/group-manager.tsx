@@ -3,30 +3,44 @@ import "./group-manager.css"
 import { FormEvent, useState } from "react";
 import { groupService } from '@/services/groupService';
 import { useAlertModal } from '@/stores/alertModalStore';
-import { useCurrentRoomMembers, useCurrentRoomId, RoomMemberDetail } from '@/stores/roomStore';
+import {  useCurrentRoomId, useRoomStore } from '@/stores/roomStore';
+import { RoomMemberInfo } from '@/libs/types';
+import { useCurrentUser } from '@/stores/authStore';
+import useDebounce from '@/hooks/useDebouce';
 
 
 const GroupManager = () => {
-  const {otherMembers} = useCurrentRoomMembers() as RoomMemberDetail;
+  const currentUser = useCurrentUser();
+  const otherMembers = useRoomStore((state) => state.currentRoom?.otherRoomMemberInfos) as RoomMemberInfo[];
+  const groupOwner = useRoomStore((state) => state.currentRoom?.groupInfo?.groupOwner);
   const currentRoomId = useCurrentRoomId() as string;
-  const {onOpen, setOnOk} = useAlertModal();
+  const {onOpen, setOnOk, setTitle} = useAlertModal();
   const [users, setUsers] = useState(otherMembers.map((info) => info.user));
 
-  const handleSearch = (e: FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const searchTerm = formData.get("searchTerm") as string;
-    if(!searchTerm) return;
-   
+  const handleSearch = (searchTerm: string) => {
     setUsers(otherMembers.filter((info) => info.user.fullname.toLowerCase().includes(searchTerm.toLowerCase())).map((info) => info.user));
-  };
+  }
+
+  const handleSearchDebouce = useDebounce(handleSearch, 300)
 
   const handleDeleteGroup = () => {
     setOnOk(() => groupService.deleteGroup(currentRoomId));
+    setTitle('Bạn có muốn xóa group này không?');
     onOpen();
   }
-  const handleSetGroupOwner = (id: string) => {
-    
+
+  const handleLeaveGroup = () => {
+    setOnOk(() => groupService.leaveGroup(currentRoomId));
+    setTitle('Bạn có muốn rời group này không?');
+    onOpen();
+  }
+
+  const handleSetGroupOwner = (userId: string) => {
+    groupService.changeGroupOnwer(currentRoomId, userId).then((result) => {
+
+    }).catch((error) => {
+
+    });
   }
   const handleKick = async (id: string) => {
     try {
@@ -41,11 +55,20 @@ const GroupManager = () => {
     setUsers(newUsers);
   }, [otherMembers.length])
   return (
-    <div className="group-manager">
-      <button onClick={handleDeleteGroup}>Xóa nhóm</button>
-      <form onSubmit={handleSearch}>
-        <input type="text" placeholder="Nhập để tìm kiếm" name="searchTerm" />
-        <button>Tìm kiếm</button>
+    <div className="group-manager bg-darker">
+      <div className="top">
+        <div>
+          Chủ nhóm: {groupOwner?.fullname}
+        </div>
+        { groupOwner?.id === currentUser?.id &&
+          <button className="btn-delete-group btn-none" onClick={handleDeleteGroup}>Xóa nhóm</button>
+        }
+         { groupOwner?.id !== currentUser?.id &&
+          <button className="btn-delete-group btn-none" onClick={handleLeaveGroup}>Rời nhóm</button>
+        }
+      </div>
+      <form>
+        <input type="text" placeholder="Nhập để tìm kiếm" name="searchTerm" onChange={(e) => {handleSearchDebouce(e.currentTarget.value)}}/>
       </form>
       <ul>
       {users && users.map((user) => (
@@ -54,10 +77,12 @@ const GroupManager = () => {
             <img src={user.avatar || "./avatar.png"} alt="" />
             <span>{user.fullname}</span>
           </div>
-         <div className="group-btn">
-          <button className="left-btn" onClick={() => handleSetGroupOwner(user.id)}>Chủ Nhóm</button>
-          <button className="right-btn" onClick={() => handleKick(user.id)}>Đuổi</button>
-         </div>
+        {groupOwner?.id === currentUser?.id && (
+           <div className="group-btn">
+           <button className="left-btn" onClick={() => handleSetGroupOwner(user.id)}>Chủ Nhóm</button>
+           <button className="right-btn" onClick={() => handleKick(user.id)}>Đuổi</button>
+          </div>
+        )}
         </div>
       ))}
       {users && users.length === 0 && (

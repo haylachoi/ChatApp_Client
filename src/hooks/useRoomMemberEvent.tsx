@@ -8,8 +8,8 @@ const useRoomMemberEvent = () => {
         const addRoomMemberEventId = groupService.onAddRoomMember.sub((roomMember) => {
           addRoomMember(roomMember);    
         })
-        const removeRoomMemberEventId = groupService.onRemoveRoomMember.sub((roomMember) => {
-          removeRoomMember(roomMember);    
+        const removeRoomMemberEventId = groupService.onRemoveRoomMember.sub((roomId, userId) => {
+          removeRoomMember(roomId, userId);    
         })
         return () => {
           groupService.onAddRoomMember.unsub(addRoomMemberEventId);

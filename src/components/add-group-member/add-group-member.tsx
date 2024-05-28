@@ -5,17 +5,22 @@ import './add-group-member.css'
 import { groupService } from '@/services/groupService';
 import { useCurrentRoomId } from '@/stores/roomStore';
 
+interface FormElements extends HTMLFormControlsCollection {
+  searchTerm: HTMLInputElement
+}
+interface SearchFormElement extends HTMLFormElement {
+  readonly elements: FormElements
+}
 
 const AddGroupMember = () => {
   const [users, setUsers] = useState<User[]>([]);
   const currentRoomId = useCurrentRoomId() as string;
  
 
-  const handleSearch = async (e: FormEvent) => {
+  const handleSearch = async (e: React.FormEvent<SearchFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const searchTerm = formData.get("searchTerm") as string;
-    
+    const searchTerm = e.currentTarget.elements.searchTerm.value;
+
     try {
       const result = await userService.searchUserNotInRoom(currentRoomId, searchTerm);
       if (result.isSuccess) {

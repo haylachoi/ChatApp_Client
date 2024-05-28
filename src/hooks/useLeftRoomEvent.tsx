@@ -7,7 +7,7 @@ import { useEffect } from "react";
 
 
 const useLeftRoomEvent = () => {
-  const {removeRoomChat, setCurrentRoom} = useRoomActions();
+  const {removeRoom: removeRoomChat, setCurrentRoom} = useRoomActions();
   const {closeModal, setCurrentModal} = useAppModalActions();
   const {onClose} = useAlertModalActions()
   const currentRoomId = useCurrentRoomId();

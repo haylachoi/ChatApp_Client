@@ -1,6 +1,4 @@
-
-
-.message-box { 
+.message-box {
   display: flex;
   gap: 10px;
   position: relative;
@@ -8,34 +6,30 @@
   max-width: 70%;
   min-width: 150px;
   &.own {
-    align-self: flex-end;  
+    align-self: flex-end;
     .message-wrapper {
       background-color: #5183fe;
-      
     }
   }
 
   .message-wrapper {
     display: flex;
     flex-direction: column;
-    gap:2px;
-   
+    gap: 2px;
     width: 100%;
-    padding: 10px;
+    padding: 10px 20px;
     border-radius: 10px;
     background-color: rgba(17, 25, 40, 0.8);
-    padding:10px;
 
     .message-content {
       width: 100%;
-      height: 100%;  
-     
+      height: 100%;
+
       .message-owner {
         font-size: 0.75rem;
         margin-bottom: 5px;
         font-weight: 100;
         color: var(--name-color);
-        /* color: aquamarine; */
       }
       p {
         font-size: 1.25rem;
@@ -47,16 +41,19 @@
         border-radius: 10px;
         object-fit: cover;
       }
+
+      pre {
+        white-space:pre-wrap; 
+        word-wrap:break-word;
+      }
     }
   }
 
   .message-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 9999px;
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
   }
-  
-
 
   .reaction-tray {
     display: flex;
@@ -71,32 +68,73 @@
     padding: 0 10px;
     height: 22px;
     transform: translate(-40px, 50%);
+
     .reaction-icon {
-    
       color: black;
       width: 15px;
       height: 15px;
-      
     }
   }
 
   .reaction-menu {
-    display: none;
+    /* display: none; */
+    visibility: hidden;
     position: absolute;
     bottom: 0;
     right: 0;
     transform: translate(-10%, 50%);
-  }
-  
-  &:hover {
-    .reaction-menu {
-      display: block;
+    opacity: 0.2;
+    transition: all 0.5s;
+    &:hover ~ .quote-btn {
+      visibility: hidden;
+    }
+
+    &:has(~ .quote-btn:hover) {
+      visibility: hidden;
     }
   }
- .message-status{
 
-  span {
-    font-size: 9px;
+  &:hover {
+    .reaction-menu {
+      /* display: block; */
+      visibility: visible;
+      opacity: 1;
+      transition: all 0.5s;
+    }
   }
- }
+  .message-status {
+    span {
+      font-size: 9px;
+    }
+  }
+
+  .quote-btn {
+    width: 24px;
+    height: 24px;
+    color: white;
+    visibility: hidden;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    transform: translateX(150%);
+    opacity: 0.5;
+    transition: opacity .5s ease, visibility 0s .5s; 
+    
+    &:hover ~ .reaction-menu{
+      visibility: hidden !important;
+    }
+  }
+
+  &:hover {
+    .quote-btn {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity .5s ease, visibility 0s 0s; 
+    }
+  }
+
 }
+
+/* .reaction-menu:has(~.quote-btn:hover) {
+  visibility: hidden;
+} */

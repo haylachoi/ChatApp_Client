@@ -1,4 +1,4 @@
-import { AuthToken, User, UserInfo } from '@/libs/types';
+import { AuthToken, Profile} from '@/libs/types';
 import { CONNECTION_MAX_ATTEMPT, REST_SEGMENT } from '../libs/constant';
 import { httpClient } from '@/libs/httpClient';
 
@@ -21,8 +21,15 @@ const login = async (data: {
   return result.data as AuthToken;
 };
 
-const register = async (formData: FormData): Promise<string> => {
+const register = async (data: {email: string, password: string, fullname: string, file: File | null}): Promise<Profile> => {
   const url = `${REST_SEGMENT.AUTH}/register`;
+
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value) {
+      formData.append(key, value);
+    }
+  });
 
   const result = await httpClient.post(url, formData);
   return result.data;
@@ -48,7 +55,7 @@ export const authService = {
   getAuthHeaders,
 };
 
-export const setUserInfo = (user: UserInfo) => {
+export const setUserInfo = (user: Profile) => {
   const str = JSON.stringify(user);
   const code = btoa(str);
   localStorage.setItem('userInfo', code);
@@ -60,7 +67,7 @@ export const getUserInfo = () => {
     return null;
   }
   const str = atob(code);
-  return JSON.parse(str) as UserInfo;
+  return JSON.parse(str) as Profile;
 };
 
 export const clearUserInfo = () => {

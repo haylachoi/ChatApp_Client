@@ -1,3 +1,15 @@
+:root {
+  --green: hsla(130, 70%, 41%, 0.623);
+  --orange: hsla(30, 100%, 50%, 1);
+  --background-color: hsla(219, 40%, 11%, 0.75);
+  --background-color-dark: hsla(219, 40%, 11%, 0.9);
+  --background-color-secondary: hsla(224, 16%, 86%, 0.9);
+  --border-color: rgba(255, 255, 255, 0.125);
+  --red: hsla(2, 90%, 55%, 0.877);
+  --gray: hsla(225, 5%, 85%, 0.75);
+}
+
+
 * {
   margin: 0;
   padding: 0;
@@ -58,6 +70,10 @@ body {
   margin-left: 20px ;
 }
 
+.bg-darker {
+  background-color: var(--background-color-dark);
+  backdrop-filter: blur(19px) saturate(180%);
+}
 .ping {
   animation: ping 1s infinite alternate ease-in-out;
 }
@@ -67,14 +83,62 @@ body {
     transform: scale(120%, 120%);
   }
 }
-:root {
-  --green: hsla(130, 70%, 41%, 0.623);
-  --orange: hsla(30, 100%, 50%, 1);
-  --background-color: hsla(219, 40%, 11%, 0.75);
-  --background-color-dark: hsla(219, 40%, 11%, 0.9);
-  --background-color-secondary: hsla(220, 22%, 73%, 0.9);
-  --border-color: rgba(255, 255, 255, 0.125)
+
+.spinner {
+  animation: spinner 2s infinite linear;
 }
-/* ::-webkit-scrollbar {
-  background: transparent;
-} */
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.fade-in {
+  animation: fade-in 0.5s;
+}
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.fade-out {
+  animation: fade-in 0.5s;
+}
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+
+
+* { 
+  &::-webkit-scrollbar-thumb {
+      border: 2px solid transparent;
+      border-radius: 10px;
+      background-color: grey;
+      background-clip: content-box;
+     -webkit-background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+      background-clip: border-box;
+     -webkit-background-clip: border-box;
+  }
+
+  &::-webkit-scrollbar {
+      width: 0.65rem;
+      height: 0.65rem;
+      background-color: transparent;
+  }
+}

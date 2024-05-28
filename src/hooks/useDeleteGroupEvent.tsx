@@ -5,7 +5,7 @@ import { useCurrentRoomId, useRoomActions } from '@/stores/roomStore'
 import { useEffect } from 'react'
 
 const useDeleteGroupEvent = () => {
-  const {removeRoomChat, setCurrentRoom} = useRoomActions();
+  const {removeRoom: removeRoomChat, setCurrentRoom} = useRoomActions();
   const {closeModal, setCurrentModal} = useAppModalActions();
   const {onClose} = useAlertModalActions()
   const currentRoomId = useCurrentRoomId();

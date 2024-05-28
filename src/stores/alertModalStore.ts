@@ -5,6 +5,7 @@ interface useAlertModalProps {
  title: string;
  onOk: () => void;
 
+ setTitle: (title: string) => void;
  setOnOk: (onOk: () => void) => void;
  onOpen: () => void;
  onClose: () => void;
@@ -15,6 +16,7 @@ export const useAlertModal = create<useAlertModalProps>()((set) => ({
   title: '',
   onOk: () => {},
 
+  setTitle: (title) => set({title}),
   setOnOk: (onOk) => set({onOk}),
   onOpen: () => set({isOpen: true}),
   onClose: () => set({isOpen: false}),

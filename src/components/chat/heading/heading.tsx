@@ -7,25 +7,31 @@ import { ModalElement, useAppModalActions } from '@/stores/modalStore';
 import { useCurrentPeer, useVideoCallActions } from '@/stores/videoCallStore';
 import { videoCallService } from '@/services/videoCallService';
 import {
-  useCurrentRoomMembers,
-  useCurrentRoomInfo,
+ 
   useCurrentRoomId,
-  RoomMemberDetail,
-  RoomInfo,
+  useRoomStore,
+ 
 } from '@/stores/roomStore';
+import { RoomMemberInfo } from '@/libs/types';
 
 const Heading = () => {
-  const { otherMembers } = useCurrentRoomMembers() as RoomMemberDetail;
-  const currentRoomId = useCurrentRoomId() as string;
-  const currentRoomInfo = useCurrentRoomInfo() as RoomInfo;
+  const currentRoom = useRoomStore(({currentRoom: room}) => ({
+    id: room?.id as string,
+    isGroup: room?.isGroup,
+    name: room?.name,
+    avatar: room?.avatar,
+    currentMember: room?.currentRoomMemberInfo as RoomMemberInfo,
+    otherMembers: room?.otherRoomMemberInfos as RoomMemberInfo [],
+  }))
+  const {otherMembers} = currentRoom;
+  
   const peer = useCurrentPeer();
   const [isAddGroupMemberOpen, setIsAddGroupMemberOpen] = useState(false);
   const { setIsMakingCall, setReceiver } = useVideoCallActions();
-
   const { openModal, setCurrentModal } = useAppModalActions();
 
   const handleOpenRoomDetail = () => {
-    if (!currentRoomInfo.isGroup) return;
+    if (!currentRoom.isGroup) return;
     setCurrentModal(ModalElement.groupManager);
     openModal();
   };
@@ -36,7 +42,7 @@ const Heading = () => {
 
     console.log('current peerId', peer.id);
     const result = await videoCallService.callVideo(
-      currentRoomId,
+      currentRoom.id,
       receiverId,
       peer.id,
     );
@@ -50,8 +56,8 @@ const Heading = () => {
         <button className="btn-none info-btn" onClick={handleOpenRoomDetail}>
           <img
             src={
-              (currentRoomInfo.isGroup
-                ? currentRoomInfo.avatar
+              (currentRoom.isGroup
+                ? currentRoom.avatar
                 : otherMembers[0].user.avatar) || './avatar.png'
             }
             alt=""
@@ -59,15 +65,15 @@ const Heading = () => {
         </button>
         <div className="texts">
           <span>
-            {currentRoomInfo.isGroup
-              ? currentRoomInfo.name
+            {currentRoom.isGroup
+              ? currentRoom.name
               : otherMembers[0].user.fullname}
           </span>
           <p>Lorem ipsum dolor, sit amet.</p>
         </div>
       </div>
       <div className="icons">
-        {currentRoomInfo.isGroup && (
+        {currentRoom.isGroup && (
           <button
             className="add-btn"
             onClick={() => setIsAddGroupMemberOpen((prev) => !prev)}>

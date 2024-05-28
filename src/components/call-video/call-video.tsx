@@ -34,7 +34,7 @@ const CallVideo = () => {
   }, [call]);
 
   return (
-    <div className="call-video-area">
+    <div className="call-video-area bg-darker">
       <h1 className="title">
         {hasIncommingCall ? caller?.fullname : receiver?.fullname}
       </h1>

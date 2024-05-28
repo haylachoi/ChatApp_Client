@@ -10,11 +10,11 @@ const ReactionMenuButton = ({ message }: { message: MessageData }) => {
     const currentUser = useCurrentUser();
     if (!currentUser) return <></>;
 
-    const {reactions} = useReactionsStore();
+    const {reactionMap, reactionArray} = useReactionsStore((state) => state.reactions);
 
-    const reactionArray: Reaction[] = [];
-    reactions.forEach((reaction) => reactionArray.push(reaction));
-    const firstReactionId =  reactions.entries().next().value[1].id;
+    // const reactionArray: Reaction[] = [];
+    // reactionMap.forEach((reaction) => reactionArray.push(reaction));
+    const firstReactionId =  reactionMap.entries().next().value[1].id;
     const currentMessageDetail = message.messageDetails.find(md => md.userId === currentUser?.id);
     
     const handleSendReaction = (message: MessageData, reactionId: string | undefined) => {

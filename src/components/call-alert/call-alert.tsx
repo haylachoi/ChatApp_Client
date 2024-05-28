@@ -30,7 +30,7 @@ const CallAlert = () => {
   }, [receiver, peer]);
 
   return (
-    <div className="call-alert">
+    <div className="call-alert bg-darker">
       <p className="title">Đang gọi cho {receiver?.fullname}</p>
       <p className="phone-call-icon-wrapper">
         <PhoneOutgoing className="phone-call-icon ping" />

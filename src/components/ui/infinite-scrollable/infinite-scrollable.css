@@ -5,19 +5,20 @@
         border: none;
         bottom: 15px;
         left: 100%;
-        opacity: 0.2;
+        opacity: 0;
         width: 35px;
         height: 35px;
         border-radius: 10px;
-        background-color: rgba(28, 211, 83, 0.8);
-        visibility: collapse;
+        background-color: hsla(59, 72%, 59%, 0.8);
+        display: none;
         cursor: pointer;
-        transition: all 0.5s;
+        transition: all 1.5s;
         &:hover {
             opacity: 0.5;
         }
     }
     .show {
-        visibility: visible;
+        opacity: 0.2;
+        display: block;
     }
 }

@@ -5,10 +5,11 @@ import './chatList.css';
 import React from 'react';
 
 import { useCurrentUser } from '@/stores/authStore';
-import { useCurrentRoomId, useRoomActions, useRooms } from '@/stores/roomStore';
+import { useCurrentRoomId, useRoomActions, useRooms, useRoomStore } from '@/stores/roomStore';
 import { ModalElement, useAppModalActions } from '@/stores/modalStore';
 import useJoinRoomEvent from '@/hooks/useJoinRoomEvent';
 import { Profile, Room } from '@/libs/types';
+import { useChatViewportStore } from '@/stores/chatViewportStore';
 
 const ChatList = () => {
   const currentRoomId = useCurrentRoomId() as string;
@@ -16,9 +17,9 @@ const ChatList = () => {
 
   const { setCurrentModal, openModal } = useAppModalActions();
   const [input, setInput] = useState('');
-
+  const viewportRef = useChatViewportStore((state) => state.currentViewportRef);
   const roomChats = useRooms();
-  const { fetchRoomChats, setCurrentRoom } = useRoomActions();
+  const { fetchRooms, setCurrentRoom, setViewportScrollTop } = useRoomActions();
 
   let filtedRooms: Room[] = useMemo(() => {
     let filter = roomChats.filter((room) => {
@@ -52,9 +53,10 @@ const ChatList = () => {
   };
 
   useJoinRoomEvent();
+  
   useEffect(() => {
     if (currentUser?.id) {
-      fetchRoomChats(currentUser.id);
+      fetchRooms(currentUser.id);
     }
   }, []);
 
@@ -89,6 +91,9 @@ const ChatList = () => {
               }`}
               key={roomChat.id}
               onClick={() => {
+                if(viewportRef) {
+                  setViewportScrollTop(currentRoomId, viewportRef.current?.scrollTop ?? 0);
+                }
                 setCurrentRoom(roomChat);
               }}>
               <img

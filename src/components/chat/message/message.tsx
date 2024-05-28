@@ -1,40 +1,53 @@
-import React from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import { format } from 'timeago.js';
 import './message.css';
-import { useReactionsStore } from '@/stores/reactionStore';
-import { Reaction, MessageData, User, Profile } from '@/libs/types';
+import { MessageData, Profile, RoomMemberInfo } from '@/libs/types';
 import ReactionMenuButton from './reaction/reaction-menu-button';
 import { ReactionIcon } from './reaction-icon/reaction-icon';
 import { useCurrentUser } from '@/stores/authStore';
-import { RoomMemberDetail, useCurrentChats, useCurrentRoomInfo, useCurrentRoomMembers, useIsCurrentRoomGroup } from '@/stores/roomStore';
+import {
+  useCurrentChats,
+  useIsCurrentRoomGroup,
+  useRoomStore,
+} from '@/stores/roomStore';
+import clsx from 'clsx';
+import { useQuoteStore } from '@/stores/quoteStore';
+import MessageQuote from '@/components/message-quote/message-quote';
+import { QuoteIcon } from 'lucide-react';
+
 
 interface MessageProps {
   index: number;
   message: MessageData;
-  messagesRef: React.MutableRefObject<(HTMLDivElement | null)[]>;
-  lastMessageRef: React.MutableRefObject<HTMLDivElement | null>;
-  lastSeenMessageRef: React.MutableRefObject<HTMLDivElement | null>;
+  // unseenMessagesRef: React.MutableRefObject<(HTMLDivElement | null)[]>;
+  // lastMessageRef: React.MutableRefObject<HTMLDivElement | null>;
+  // firstUnseenMessageRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-const Message: React.FC<MessageProps> = ({
+const Message = forwardRef<HTMLDivElement, MessageProps>(({
   index,
   message,
-  messagesRef,
-  lastSeenMessageRef,
-  lastMessageRef,
-}) => {
-  const {currentMember, otherMembers} = useCurrentRoomMembers() as RoomMemberDetail;
+  // unseenMessagesRef,
+  // firstUnseenMessageRef,
+  // lastMessageRef,
+}, forwardedRef) => {
+  const currentMember = useRoomStore(
+    (state) => state.currentRoom?.currentRoomMemberInfo,
+  ) as RoomMemberInfo;
+  const otherMembers = useRoomStore(
+    (state) => state.currentRoom?.otherRoomMemberInfos,
+  ) as RoomMemberInfo[];
+
   const currentUser = useCurrentUser() as Profile;
   const currentChats = useCurrentChats() as MessageData[];
   const isGroup = useIsCurrentRoomGroup() as boolean;
+  const {setQuote} = useQuoteStore();
 
-  const { reactions } = useReactionsStore();
-  const reactionArray: Reaction[] = [];
-  reactions.forEach((reaction) => reactionArray.push(reaction));
+  const messageOwner = useMemo(
+    () => otherMembers.find((info) => info.user.id === message.senderId)?.user,
+    [message.senderId],
+  );
 
-  const messageOwner = otherMembers.find(
-    (info) => info.user.id === message.senderId,
-  )?.user;
   const initReactionData: { id: string; users: string[] }[] = [];
   const messageReactionData = message.messageDetails.reduce((acc, md) => {
     if (md.reactionId) {
@@ -48,29 +61,34 @@ const Message: React.FC<MessageProps> = ({
     return acc;
   }, initReactionData);
 
-  const handleRef: React.LegacyRef<HTMLDivElement> | undefined = (el) => {
-    if (
-      !message.messageDetails.find((md) => md.userId == currentUser.id) &&
-      message.senderId !== currentUser?.id &&
-      !messagesRef.current.find((e) => e?.dataset.id == message.id)
-    ) {
-      messagesRef.current.push(el);
-    }
-    if (message.id ==currentMember.lastSeenMessageId) {
-      lastSeenMessageRef.current = el;
-    }
+  // const handleRef: React.LegacyRef<HTMLDivElement> | undefined = (el) => {
+  //   if (
+  //     currentMember.firstUnseenMessageId &&
+  //     message.id >= currentMember.firstUnseenMessageId &&
+  //     message.senderId !== currentUser.id &&
+  //     !unseenMessagesRef.current.find((e) => e?.dataset.id == message.id)
+  //   ) {
+  //     unseenMessagesRef.current.push(el);
+  //   }
+  //   if (message.id == currentMember.firstUnseenMessageId) {
+  //     firstUnseenMessageRef.current = el;
+  //   }
 
-    if (currentChats && index == currentChats?.length - 1)
-      lastMessageRef.current = el;
-  };
+  //   if (currentChats && index == currentChats?.length - 1)
+  //     lastMessageRef.current = el;
+  // };
+
+  const handleSetQuote = (message: MessageData) => {
+    setQuote(message);
+  }
   return (
     <div
       id={`private_message_${message.id}`}
-      ref={handleRef}
+      ref={forwardedRef}
       data-id={message.id}
-      className={
-        message.senderId === currentUser?.id ? 'message-box own' : 'message-box'
-      }
+      className={clsx('message-box', 'fade-in', {
+        own: message.senderId === currentUser?.id,
+      })}
       key={message?.id}>
       {messageOwner && (
         <img
@@ -92,31 +110,40 @@ const Message: React.FC<MessageProps> = ({
             </p>
           )}
           {message.isImage && <img src={message.content} alt="" />}
-          {!message.isImage && (
-            <p>
-              {message.content} {message.id}
-            </p>
+          {!message.isImage && (           
+            <>
+              {message.quote && (
+                <MessageQuote quote={message.quote}/>
+              )}
+              <pre>
+                {message.content} {message.id}
+              </pre>
+            </>
           )}
         </div>
         {messageReactionData.length > 0 && (
-          <div className="reaction-tray">
+          <div className="reaction-tray fade-in">
             {messageReactionData.map((data) => (
               <ReactionIcon key={data.id} id={data.id} />
             ))}
           </div>
         )}
         {currentUser && message.senderId != currentUser.id && (
+         <>
           <div className="reaction-menu">
             <ReactionMenuButton message={message} />
           </div>
+          <button className="quote-btn btn-none" onClick={() => handleSetQuote(message)}>
+            <QuoteIcon fill="white" size={24}/>
+          </button>
+         </>
         )}
         <div className="message-status">
-          {/* <span>{message.isReaded ? 'Đã xem' : 'Chưa xem'}</span> */}
           <span>{format(new Date(message.createdAt!))}</span>
         </div>
       </div>
     </div>
   );
-};
+});
 
 export default Message;

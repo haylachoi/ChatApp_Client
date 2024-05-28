@@ -151,9 +151,9 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      <h3>Thông tin cá nhân</h3>
       <div className="separator"></div>
       <div className="user-info">
-        <h3>Thông tin cá nhân</h3>
         <div>
           <span>Email: </span> <span>{currentUser.email}</span>
         </div>

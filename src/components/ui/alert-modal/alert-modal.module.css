@@ -1,10 +1,36 @@
 .alert-modal {
-  background-color: var(--background-color-dark);
-  backdrop-filter: blur(39px) saturate(180%);
+  background-color: #fff;
   border: 1px solid var(--border-color);
-  color: white;
+  color: black;
   padding: 20px;
+  box-shadow: 0 0 6px var(--border-color);
+  border-radius: 10px;
 
+  .title {
+    margin: 20px;
+  }
+
+  .btn-group {
+    margin: 20px;
+
+    button {
+      border: none;
+      outline: none;
+      padding: 10px 20px;
+      color: #fff;
+      cursor: pointer;
+    }
+    .btn-ok {
+      background-color: var(--red);
+    }
+
+    .btn-cancel {
+      margin-left: 20px;
+      background-color: transparent;
+      color: #000;
+      border: 1px solid #000;
+    }
+  }
   &.center-center{
       position: absolute;
       top: 50%;

@@ -1,4 +1,5 @@
 import { chatService } from '@/services/chatService';
+import { roomService } from '@/services/roomService';
 import { useCurrentChats } from '@/stores/roomStore';
 import React, { useEffect } from 'react';
 
@@ -13,13 +14,26 @@ const useObserveUnseenMessage = (
         entries.forEach((entry) => {
           const element = entry.target as HTMLElement;
           const id = element.dataset?.id;
-          if (id !== undefined && entry.isIntersecting) {
-            chatService
-              .updateIsReaded(id)
+          if (id !== undefined && entry.isIntersecting) {        
+            console.log(id);
+            roomService.updateFirstUnseenMessage(id)
               .then((result) => {
-                observer.unobserve(entry.target);
+                // if (result.isSuccess) {
+                //   observer.unobserve(entry.target);           
+                // }
               })
-              .catch();
+              .catch()
+              .finally(() => {
+                messagesRef.current = messagesRef.current.filter((m) => {
+                  if (m?.dataset.id &&  +m.dataset.id > +id) {
+                    return true;
+                  }
+                  if (m) {
+                    observer.unobserve(m);
+                  }
+                  return false;
+                });          
+              });
           }
         });
       },
@@ -30,7 +44,7 @@ const useObserveUnseenMessage = (
       },
     );
 
-    messagesRef.current?.map((el) => {
+    messagesRef.current?.forEach((el) => {
       if (el) {
         observer.observe(el);
       }
@@ -38,13 +52,13 @@ const useObserveUnseenMessage = (
 
     // Clean up the observer
     return () => {
-      messagesRef.current?.map((el) => {
+      messagesRef.current?.forEach((el) => {
         if (el) {
           observer.unobserve(el);
         }
       });
     };
-  }, [currentChats?.length]);
+  }, [currentChats]);
 };
 
 export default useObserveUnseenMessage;

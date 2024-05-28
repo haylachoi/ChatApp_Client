@@ -1,26 +1,31 @@
 import { chatService } from '@/services/chatService';
-import { useCurrentChats, useCurrentRoomId,  useCurrentRoomPreviousLastMessageId, useRoomActions } from '@/stores/roomStore';
+import { roomService } from '@/services/roomService';
+import { useRoomActions, useRooms } from '@/stores/roomStore';
 import { useEffect } from 'react';
 
 const useReceiveMessageEvent = () => {
-  const previousLastMessageId = useCurrentRoomPreviousLastMessageId();
-  const currentRoomId = useCurrentRoomId();
-  const currentChats = useCurrentChats();
+  const { addMessage, updateCanDisplayRoom } =
+    useRoomActions();
+  const roomChats = useRooms();
   
-  const { addMesageToRoom } = useRoomActions();
   useEffect(() => {
     const key = chatService.onReceiveMessage.sub((message) => {
-      if (message.roomId === currentRoomId) {
-        if (!currentChats || currentChats.length < 1 || currentChats[currentChats.length -1].id === previousLastMessageId) {
-          addMesageToRoom(message.roomId, message);
-        }
-      }  
+      addMessage(message.roomId, message);
+      let room = roomChats.find((room) => room.id == message.roomId);
+      if (room && !room.currentRoomMemberInfo.canDisplayRoom) {
+        roomService.updateCanMessageDisplay(room.id, true).then((result) => {
+          if (result.isSuccess) {
+            const roomInfo = result.data;
+            updateCanDisplayRoom(room.id, roomInfo.canDisplayRoom);
+          }
+        });
+      }
     });
 
     return () => {
       chatService.onReceiveMessage.unsub(key);
     };
-  }, [previousLastMessageId, currentRoomId, currentChats]);
+  }, [roomChats]);
 };
 
 export default useReceiveMessageEvent;

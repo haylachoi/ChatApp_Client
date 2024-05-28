@@ -1,12 +1,21 @@
-import { Reaction } from "@/libs/types";
-import {create} from "zustand";
+import { Reaction } from '@/libs/types';
+import { create } from 'zustand';
 
 interface useReactionsStoreProps {
- reactions: Map<string, Reaction>
- setReactions: (reactions: Map<string,Reaction>) => void;   
+  reactions: {
+    reactionArray: Reaction[];
+    reactionMap: Map<string, Reaction>;
+  };
+  setReactions: (reactions: {
+    reactionArray: Reaction[];
+    reactionMap: Map<string, Reaction>;
+  }) => void;
 }
 
 export const useReactionsStore = create<useReactionsStoreProps>((set) => ({
-    reactions: new Map<string, Reaction>(),
-    setReactions: (reactions) => set({reactions})
-}))
+  reactions: {
+    reactionArray: [],
+    reactionMap: new Map<string, Reaction>(),
+  },
+  setReactions: (reactions) => set({ reactions }),
+}));

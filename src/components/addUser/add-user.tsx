@@ -5,13 +5,20 @@ import { userService } from "@/services/userService";
 import { roomService } from "@/services/roomService";
 import { User } from "@/libs/types";
 
+interface FormElements extends HTMLFormControlsCollection {
+  searchTerm: HTMLInputElement
+}
+interface SearchFormElement extends HTMLFormElement {
+  readonly elements: FormElements
+}
+
+
 const AddUser = () => {
   const [users, setUsers] = useState<User[]>([]);
 
-  const handleSearch = async (e: FormEvent) => {
+  const handleSearch = async (e: FormEvent<SearchFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const searchTerm = formData.get("searchTerm") as string;
+    const searchTerm = e.currentTarget.elements.searchTerm.value;
     
 
     try {

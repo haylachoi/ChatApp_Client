@@ -1,6 +1,6 @@
 import { Profile, User } from "@/libs/types";
 import { clearToken } from "@/services/authService";
-import { chatHub, roomHub, userHub } from "@/services/hubConnection";
+import { chatHub, clientHub, roomHub, userHub } from "@/services/hubConnection";
 import { create } from "zustand";
 
 
@@ -8,30 +8,40 @@ interface useAuthStoreProps {
   isLogin: boolean;
   isConnected: boolean;
   currentUser: Profile | undefined;
+  isLoginPage: boolean;
   
   updateAvatar: (avatar: string) => void;
   logout: () => void;
   setIsLogin: (isLogin: boolean) => void;
   setIsConnected: (isLogin: boolean) => void;
   setCurrentUser: (currentUser: Profile) => void;
+  setIsLoginPage: (isLoginPage: boolean) => void;
 }
 
 const useAuthStore = create<useAuthStoreProps>()((set) => ({
   isLogin: false,
   isConnected: false,
   currentUser: undefined,
+  isLoginPage: true,
   
   updateAvatar: (avatar) => set((state) => ({currentUser: {...state.currentUser,avatar} as Profile})),
-  logout: () => set(() => {
+  // logout: () => set(() => {
+  //   clearToken();
+  //   chatHub.stop();
+  //   roomHub.stop();
+  //   userHub.stop();
+  //   clientHub.stop();
+  //   return {isLogin: false, isConnected: false, currentUser: undefined};
+  // }),
+
+  logout: () => {
     clearToken();
-    chatHub.stop();
-    roomHub.stop();
-    userHub.stop();
-    return {isLogin: false, isConnected: false, currentUser: undefined};
-  }),
+    location.reload();
+  },
   setIsLogin: (isLogin) => set({isLogin}),
   setIsConnected: (isConnected) => set({isConnected}),
-  setCurrentUser: (currentUser) => set({currentUser, isLogin: true})
+  setCurrentUser: (currentUser) => set({currentUser, isLogin: true}),
+  setIsLoginPage: (isLoginPage) => set({isLoginPage})
 }));
 
 

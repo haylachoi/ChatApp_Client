@@ -4,13 +4,17 @@
     width: 600px;
     height: clamp(300px, 40vh + 5rem ,800px);
     padding: 30px;
-    background-color: var(--background-color-dark);
-    backdrop-filter: blur(19px) saturate(180%);
     border-radius: 10px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-  
+
+    .top {
+      .btn-delete-group {
+        color: var(--red);
+        font-weight: 700;
+      }
+    }
     form{
       display: flex;
       gap: 20px;
@@ -64,11 +68,11 @@
         }
         .left-btn {
           border-radius: 9999px 0 0 9999px;
-          background-color: hsla(130, 70%, 41%, 0.623);
+          background-color: var(--green);
         }
         .right-btn {
           border-radius: 0 9999px 9999px 0;
-          background-color:  hsla(30, 100%, 50%, 1);
+          background-color:  var(--red);
         }
         button {
           display: grid;

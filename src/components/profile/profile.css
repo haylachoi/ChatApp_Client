@@ -13,7 +13,7 @@
    
     align-items: center;
     .profile-avatar-area {
-      margin: 20px;
+      margin: 20px 0px;
 
       gap: 20px;
       .profile-avatar-img-group {
@@ -116,7 +116,7 @@
     }
   }
   .user-info {
-    padding: 20px;
+    padding: 10px 0;
   }
   .logout-btn {
     color: white;

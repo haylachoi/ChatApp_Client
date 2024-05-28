@@ -1,23 +1,19 @@
-import { useEffect, useState } from 'react';
+import { debounce } from '@/libs/utils';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 
-function useDebounce(value: any, delay: number) {
-  const [debouncedValue, setDebouncedValue] = useState(value);
+function useDebounce(callback: Function, delay: number) {
+  const callbackRef = useRef(callback);
+  useLayoutEffect(() => {
+    callbackRef.current = callback;
+  });
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if( typeof value === 'function') {
-          setDebouncedValue(value());
-      } else{
-          setDebouncedValue(value);
-      }
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
+  // useMemo: nếu return debounce trực tiếp thì mỗi khi re-render (useDebounce() dc gọi) thì sẽ tạo ra một version mới của debounce()
+  // useRef và useCallback: update callback mới nhất,
+  return useMemo(
+    () => debounce((...args: any) => callbackRef.current(...args), delay),
+    [delay],
+  );
 }
 
 export default useDebounce;
+

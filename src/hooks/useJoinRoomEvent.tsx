@@ -5,14 +5,14 @@ import {
 } from '@/stores/roomStore';
 import { useCurrentUser } from '@/stores/authStore';
 import { useEffect } from 'react';
+import { Profile } from '@/libs/types';
 
 const useJoinRoomEvent = () => {
-  const currentUser = useCurrentUser();
-
-  const { addRoomChat } = useRoomActions();
+  const currentUser = useCurrentUser() as Profile;
+  const { addRoom: addRoomChat } = useRoomActions();
+  
   useEffect(() => {
     const key = roomService.onJoinRoom.sub((rawRoom) => {
-      if (!currentUser) return;
       const room = convertRawRoomToRoom(rawRoom, currentUser.id);
       if (room) {
         addRoomChat(room);

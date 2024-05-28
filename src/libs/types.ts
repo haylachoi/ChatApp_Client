@@ -16,6 +16,20 @@ export interface Profile extends User{
     email: string;   
 }
 
+// export interface Quote {
+//     messageId: string;
+//     userId: string;
+//     content: string;
+// }
+// export interface RawMessageData {
+//     id: string;
+//     content: string;
+//     senderId: string;
+//     isImage: boolean;
+//     roomId: string;
+//     createdAt: string | undefined;
+//     messageDetails: MessageDetail[]
+// }
 export interface MessageData {
     id: string ;
     content: string;
@@ -23,7 +37,8 @@ export interface MessageData {
     isImage: boolean;
     roomId: string;
     createdAt: string | undefined;
-    messageDetails: MessageDetail[]
+    messageDetails: MessageDetail[];
+    quote?: MessageData;
 }
 export interface MessageDetail {
     id: string;
@@ -38,7 +53,7 @@ export interface GroupInfo {
     id: string;
     name: string;
     avatar?: string;
-    groupOnwerId: string;
+    groupOwner: User;
 }
 export interface RawRoom {  
     id: string;    
@@ -55,12 +70,14 @@ export interface Room extends Omit<RawRoom, "roomMemberInfos"> {
     previousLastMessageId?: string;  
     name?: string;
     avatar?: string;
+    isFetched?: boolean;
+    viewportTop?: number;
 }
 
 export interface RoomMemberInfo {  
     roomId: string;
     user: User;
-    lastSeenMessageId: string;  
+    firstUnseenMessageId?: string;
     unseenMessageCount: number;
     canDisplayRoom: boolean;
     canShowNotification: boolean;
@@ -79,6 +96,10 @@ export interface NoDataHubResponse {
 export interface HubResponse<T> {
     isSuccess: boolean;
     data: T;
-    error: any;
+    error?: any;
 }
 
+// export interface MessageFormData {
+//     content: string;
+//     quote?: Quote
+// }
