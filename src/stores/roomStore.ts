@@ -43,7 +43,6 @@ interface useRoomStoreProps {
 
 export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
   rooms: [],
-
   setCurrentRoom: (currentRoom) => set({ currentRoom }),
   fetchRooms: async (currentUserId) => {
     try {
@@ -238,21 +237,42 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
 
   addPreviousMesasges: (roomId, messages) =>
     set((state) => {
+      if (messages.length <1)
+        return state;
       let room = state.rooms.find((room) => room.id == roomId);
       if (!room) return state;
 
+      // const roomIndex = state.rooms.findIndex(r => r.id === roomId);
+      // if (roomIndex < 0) 
+      //   return state;
+
+      // const room = {...state.rooms[roomIndex]};
+
       if (!room.chats) room.chats = messages;
-      else room.chats = [...messages, ...room?.chats];
+      else if(messages[messages.length -1].id < room.chats[0].id) {
+        room.chats = [...messages, ...room.chats];
+      }
+
+      // state.rooms[roomIndex] = room;
+      if (roomId === state.currentRoom?.id) {
+        return {rooms: [...state.rooms], currentRoom: room}
+      }
       return { rooms: [...state.rooms] };
     }),
   addNextMesasges: (roomId, messages) =>
     set((state) => {
+      if (messages.length <1)
+        return state;
       let room = state.rooms.find((room) => room.id == roomId);
       if (!room) return state;
-
+      console.log(room.chats, messages)
       if (!room.chats) room!.chats = messages;
-      else room!.chats = [...room?.chats, ...messages];
-
+      else if (room.chats[room.chats.length-1].id < messages[0].id) {
+        room.chats = [...room.chats, ...messages];
+      }
+      if (roomId === state.currentRoom?.id) {
+        return {rooms: [...state.rooms], currentRoom: room}
+      }
       return { rooms: [...state.rooms] };
     }),
 
