@@ -6,25 +6,20 @@ import AddGroupMember from '@/components/add-group-member/add-group-member';
 import { ModalElement, useAppModalActions } from '@/stores/modalStore';
 import { useCurrentPeer, useVideoCallActions } from '@/stores/videoCallStore';
 import { videoCallService } from '@/services/videoCallService';
-import {
- 
-  useCurrentRoomId,
-  useRoomStore,
- 
-} from '@/stores/roomStore';
-import { RoomMemberInfo } from '@/libs/types';
+import { useRoomStore } from '@/stores/roomStore';
+import { RoomIdType, RoomMemberInfo } from '@/libs/types';
 
 const Heading = () => {
-  const currentRoom = useRoomStore(({currentRoom: room}) => ({
-    id: room?.id as string,
+  const currentRoom = useRoomStore(({ currentRoom: room }) => ({
+    id: room?.id as RoomIdType,
     isGroup: room?.isGroup,
     name: room?.name,
     avatar: room?.avatar,
     currentMember: room?.currentRoomMemberInfo as RoomMemberInfo,
-    otherMembers: room?.otherRoomMemberInfos as RoomMemberInfo [],
-  }))
-  const {otherMembers} = currentRoom;
-  
+    otherMembers: room?.otherRoomMemberInfos as RoomMemberInfo[],
+  }));
+  const { otherMembers } = currentRoom;
+
   const peer = useCurrentPeer();
   const [isAddGroupMemberOpen, setIsAddGroupMemberOpen] = useState(false);
   const { setIsMakingCall, setReceiver } = useVideoCallActions();

@@ -1,0 +1,49 @@
+.room-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  cursor: pointer;
+  border-bottom: 1px solid #dddddd35;
+
+  &.room-current {
+    background-color: rgba(17, 25, 40, 0.3);
+  }
+  img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .texts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    .message-unseen-content {
+      max-width: 50%;
+      white-space: nowrap;
+      overflow: hidden;
+
+      .message-img-icon {
+        color: #5dda8766
+      }
+    }
+    .room-additional-info {
+      display: flex;
+      justify-content: space-between;
+      .message-unseen {
+        color: hsl(27, 89%, 47%);
+      }
+    }
+    span {
+      font-weight: 500;
+    }
+
+    p {
+      font-size: 14px;
+      font-weight: 300;
+    }
+  }
+}

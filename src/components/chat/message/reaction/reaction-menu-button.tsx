@@ -1,43 +1,53 @@
-import { Reaction, MessageData } from '@/libs/types'
+import { Reaction, MessageData, ReactionIdType, Profile, MessageDetail, MessageIdType } from '@/libs/types';
 import { chatService } from '@/services/chatService';
 import { useReactionsStore } from '@/stores/reactionStore';
-import React from 'react';
-import "./reaction-menu-button.css";
+import React, { FC } from 'react';
+import './reaction-menu-button.css';
 import { ReactionIcon } from '../reaction-icon/reaction-icon';
 import { useCurrentUser } from '@/stores/authStore';
 
-const ReactionMenuButton = ({ message }: { message: MessageData }) => {
-    const currentUser = useCurrentUser();
-    if (!currentUser) return <></>;
+interface ReactionMenuButtonProps {
+  messageId: MessageIdType,
+  messageDetails: MessageDetail[];
+}
+const ReactionMenuButton: FC<ReactionMenuButtonProps> = ({ messageId, messageDetails }) => {
+  const currentUser = useCurrentUser() as Profile;
+  const { reactionArray } = useReactionsStore((state) => state.reactions);
+  
+  const firstReactionId =
+  reactionArray.length > 0 ? reactionArray[0].id : undefined;
+  
+  const currentMessageDetail = messageDetails.find(
+    (md) => md.userId === currentUser.id,
+  );
 
-    const {reactionMap, reactionArray} = useReactionsStore((state) => state.reactions);
-
-    // const reactionArray: Reaction[] = [];
-    // reactionMap.forEach((reaction) => reactionArray.push(reaction));
-    const firstReactionId =  reactionMap.entries().next().value[1].id;
-    const currentMessageDetail = message.messageDetails.find(md => md.userId === currentUser?.id);
-    
-    const handleSendReaction = (message: MessageData, reactionId: string | undefined) => {
-      if (currentMessageDetail && currentMessageDetail.reactionId === reactionId){
-        reactionId = undefined;
-      }
-      chatService.updateReactionMessage(message.id, reactionId);
+  const handleSendReaction = (
+    messageId: MessageIdType,
+    reactionId: ReactionIdType | undefined,
+  ) => {
+    if (currentMessageDetail && currentMessageDetail.reactionId == reactionId) {
+      reactionId = undefined;
     }
+    chatService.updateReactionMessage(messageId, reactionId);
+  };
   return (
-    <div className={`reaction-menu-bar-btn ${!!currentMessageDetail?.reactionId ? 'reaction-show' : ''}`}>
-       <button onClick={() => handleSendReaction(message, firstReactionId)}>
-        <ReactionIcon id={undefined}/>
-       </button>
+    <div
+      className={`reaction-menu-bar-btn ${
+        !!currentMessageDetail?.reactionId ? 'reaction-show' : ''
+      }`}>
+      <button onClick={() => handleSendReaction(messageId, firstReactionId)}>
+        <ReactionIcon id={undefined} />
+      </button>
       <div className="reaction-system-bar">
         {reactionArray.map(({ id, icon: Icon }) => (
-          <button key={id} onClick={() => handleSendReaction(message, id)}>
+          <button key={id} onClick={() => handleSendReaction(messageId, id)}>
             <Icon className="reaction-btn-icon" />
           </button>
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ReactionMenuButton
-
+// export default React.memo(ReactionMenuButton);
+export default ReactionMenuButton;

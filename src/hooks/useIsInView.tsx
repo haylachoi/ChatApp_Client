@@ -2,30 +2,30 @@
 import { checkIfInView } from '@/libs/utils';
 import React, { useEffect, useRef, useState } from 'react'
 
-const useInView = (viewportRef: React.MutableRefObject<HTMLDivElement | null>, elementRef: React.MutableRefObject<HTMLDivElement | null>) => {
-  const isInviewRef = useRef(checkIfInView(elementRef, viewportRef));
+const useInView = (viewport: HTMLDivElement | undefined, element: HTMLDivElement | undefined) => {
+  const isInviewRef = useRef(checkIfInView(element, viewport));
     useEffect(() => {
         const observer = new IntersectionObserver(
           ([entry]) => {
             isInviewRef.current = entry.isIntersecting;        
           },
           {
-            root: viewportRef.current, 
+            root: viewport, 
             rootMargin: '0px', 
             threshold: 0.7, 
           },
         );
     
-        if (elementRef.current) {
-          observer.observe(elementRef.current);
+        if (element) {
+          observer.observe(element);
         }
     
         return () => {
-          if (elementRef.current) {
-            observer.unobserve(elementRef.current);
+          if (element) {
+            observer.unobserve(element);
           }
         };
-      }, [viewportRef.current, elementRef.current]);
+      }, [viewport, element]);
 
     return isInviewRef;
 }

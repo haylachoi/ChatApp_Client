@@ -1,41 +1,44 @@
-import AddGroupMember from '@/components/add-group-member/add-group-member';
 import {
   MessageData,
   MessageDetail,
-  Room,
+  MessageIdType,
+  RoomData,
+  RoomIdType,
   RoomMemberInfo,
   User,
+  UserIdType,
 } from '@/libs/types';
 import { roomService } from '@/services/roomService';
 import { create } from 'zustand';
-
+import { useShallow } from 'zustand/react/shallow'
 interface useRoomStoreProps {
-  currentRoom?: Room;
-  rooms: Room[];
+  currentRoom?: RoomData;
+  rooms: RoomData[];
 
-  setCurrentRoom: (currentRoom: Room | undefined) => void;
-  setRooms: (roomChats: Room[]) => void;
-  fetchRooms: (currentUserId: string) => void;
-  addRoom: (roomChat: Room) => void;
-  removeRoom: (roomId: string) => void;
-  replaceChats: (roomId: string, chats: MessageData[]) => void;
+  setCurrentRoom: (currentRoom: RoomData | undefined) => void;
+  setRooms: (roomChats: RoomData[]) => void;
+  fetchRooms: (currentUserId: UserIdType) => void;
+  addRoom: (roomChat: RoomData) => void;
+  removeRoom: (roomId: RoomIdType) => void;
+  replaceChats: (roomId: RoomIdType, chats: MessageData[]) => void;
 
   addRoomMember: (roomMemberInfo: RoomMemberInfo) => void;
   updateRoomMember: (roomMemberInfo: RoomMemberInfo) => void;
-  removeRoomMember: (roomId: string, userId: string) => void;
+  removeRoomMember: (roomId: RoomIdType, userId: UserIdType) => void;
 
-  changeGroupOwner: (roomId: string, owner: User) => void;
+  changeGroupOwner: (roomId: RoomIdType, owner: User) => void;
 
-  updateReactionMessage: (roomId: string, messageDetail: MessageDetail) => void;
+  updateReactionMessage: (roomId: RoomIdType, messageDetail: MessageDetail) => void;
+  deleteMessageDetail: (roomId: RoomIdType, messageDetail: MessageDetail) => void;
 
-  updateCanDisplayRoom: (roomId: string, canDisplay: boolean) => void;
-  updateFirstMessageId: (roomId: string, messageId: string) => void;
-  addMessage: (roomId: string, message: MessageData) => void;
+  updateCanDisplayRoom: (roomId: RoomIdType, canDisplay: boolean) => void;
+  updateFirstMessageId: (roomId: RoomIdType, messageId: MessageIdType) => void;
+  addMessage: (roomId: RoomIdType, message: MessageData) => void;
 
-  addPreviousMesasges: (roomId: string, chats: MessageData[]) => void;
-  addNextMesasges: (roomId: string, chats: MessageData[]) => void;
+  addPreviousMesasges: (roomId: RoomIdType, chats: MessageData[]) => void;
+  addNextMesasges: (roomId: RoomIdType, chats: MessageData[]) => void;
 
-  setViewportScrollTop: (roomId: string, scrollTop: number) => void;
+  setViewportScrollTop: (roomId: RoomIdType, scrollTop: number) => void;
 }
 
 export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
@@ -90,8 +93,13 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
     }),
   updateRoomMember: (roomMemberInfo) =>
     set((state) => {
-      let room = state.rooms.find((room) => room.id == roomMemberInfo.roomId);
-      if (!room) return state;
+     
+      
+      const roomIndex = state.rooms.findIndex(r => r.id === roomMemberInfo.roomId);
+      if (roomIndex < 0)
+        return state;
+
+      const room = {...state.rooms[roomIndex]};
 
       if (room.currentRoomMemberInfo.user.id === roomMemberInfo.user.id) {
         room.currentRoomMemberInfo = roomMemberInfo;
@@ -104,6 +112,7 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
         }
         existedRoomMember = roomMemberInfo;
       }
+      state.rooms[roomIndex] = room;
       return { rooms: [...state.rooms] };
     }),
   removeRoomMember: (roomId, userId) =>
@@ -142,24 +151,41 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
     }),
   updateReactionMessage: (roomId, newMessageDetail) =>
     set((state) => {
-      const room = state.rooms.find((room) => room.id == roomId);
+      let room = state.rooms.find((room) => room.id == roomId);
       if (!room || !room.chats) return state;
 
-      const message = room.chats.find(
-        (m) => m.id == newMessageDetail.messageId,
-      );
-      if (!message) {
+      let messageIndex = room.chats.findIndex(m => m.id == newMessageDetail.messageId);
+      if (messageIndex && messageIndex < 0) {
         return state;
       }
-      var messageDetail = message.messageDetails.find(
+      let newMessage = {...room.chats[messageIndex]};
+      newMessage.messageDetails = [...newMessage.messageDetails];
+      var messageDetail = newMessage.messageDetails.find(
         (md) => md.id == newMessageDetail.id,
       );
       if (!messageDetail) {
-        message.messageDetails = [...message.messageDetails, newMessageDetail];
+        newMessage.messageDetails.push(newMessageDetail);
       } else {
         messageDetail.reactionId = newMessageDetail.reactionId;
       }
-      return { rooms: [...state.rooms] };
+      room.chats[messageIndex] = newMessage;
+      return {};
+
+    }),
+  deleteMessageDetail: (roomId, newMessageDetail) =>
+    set((state) => {
+      let room = state.rooms.find((room) => room.id == roomId);
+      if (!room || !room.chats) return state;
+
+      let messageIndex = room.chats.findIndex(m => m.id == newMessageDetail.messageId);
+      if (messageIndex < 0) {
+        return state;
+      }
+      const newMessage = {...room.chats[messageIndex]};
+      newMessage.messageDetails =  newMessage.messageDetails.filter(md => md.messageId !== newMessageDetail.messageId && md.userId !== newMessageDetail.userId);
+
+      room.chats[messageIndex] = newMessage;
+      return {rooms: state.rooms};
     }),
 
   updateFirstMessageId: (roomId, messageId) =>
@@ -173,9 +199,12 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
 
   addMessage: (roomId, message) =>
     set((state) => {
-      let room = state.rooms.find((room) => room.id == roomId);
-      if (!room) return state;
-      
+      const roomIndex = state.rooms.findIndex(r => r.id === roomId);
+      if (roomIndex < 0) 
+        return state;
+
+      const room = {...state.rooms[roomIndex]};
+     
       room.previousLastMessageId = room.lastMessage?.id;
       room.lastMessage = message;
       const currentUserId = room.currentRoomMemberInfo.user.id;
@@ -200,7 +229,11 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
           room.chats = [message];
         }
       }
-      return { rooms: [...state.rooms] };
+      state.rooms[roomIndex] = room;
+      if (state.currentRoom?.id === room.id) {
+        return {rooms: [...state.rooms], currentRoom: room};
+      }
+      return {rooms: [...state.rooms]};
     }),
 
   addPreviousMesasges: (roomId, messages) =>
@@ -246,7 +279,7 @@ export const useIsCurrentRoomGroup = () =>
   useRoomStore((state) => state.currentRoom?.isGroup);
 
 export const useRoomActions = () =>
-  useRoomStore((state) => ({
+  useRoomStore(useShallow((state) => ({
     // setCurrentViewportRef: state.setCurrentViewportRef,
     setCurrentRoom: state.setCurrentRoom,
     setRooms: state.setRooms,
@@ -261,8 +294,10 @@ export const useRoomActions = () =>
 
     changeGroupOnwer: state.changeGroupOwner,
 
-    updateCanDisplayRoom: state.updateCanDisplayRoom,
     updateReactionMessage: state.updateReactionMessage,
+    deleteMessageDetail: state.deleteMessageDetail,
+
+    updateCanDisplayRoom: state.updateCanDisplayRoom,
     updateFirstMessageId: state.updateFirstMessageId,
     addMessage: state.addMessage,
 
@@ -270,4 +305,4 @@ export const useRoomActions = () =>
     addNextMesasges: state.addNextMesasges,
 
     setViewportScrollTop: state.setViewportScrollTop,
-  }));
+  })));

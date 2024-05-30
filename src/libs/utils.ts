@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   RawRoom,
-  Room,
+  RoomData,
+  UserIdType,
 } from './types';
 
 export const generatePublisher = <T>(subscriber: Map<string, T>) => {
@@ -17,10 +18,12 @@ export const generatePublisher = <T>(subscriber: Map<string, T>) => {
   };
 };
 export const checkIfInView = (
-  elementRef: React.MutableRefObject<HTMLElement | null>,
-  viewportRef: React.MutableRefObject<HTMLElement | null>,
+  element: HTMLElement | undefined,
+  viewport: HTMLElement | undefined,
 ) => {
-  const rect = elementRef.current?.getBoundingClientRect();
+  if (!element)
+    return false;
+  const rect = element.getBoundingClientRect();
   if (!rect) return false;
   const inView =
     rect.top >= 0 &&
@@ -44,23 +47,9 @@ export function debounce(fn: Function, delay: number) {
   };
 }
 
-// export const convertRawMessageToMessage = (rawMessage: RawMessageData) => {
-//   try {
-//     const { content, ...rest } = rawMessage;
-//     const jsonObj: MessageFormData = JSON.parse(rawMessage.content);
-//     const message: MessageData = {
-//       ...rest,
-//       content: jsonObj.content,
-//       quote: jsonObj.quote,
-//     };
-//     return message;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
 export const convertRawRoomToRoom = (
   rawRoom: RawRoom,
-  currentUserId: string,
+  currentUserId: UserIdType,
 ) => {
   try {
     const { roomMemberInfos, ...rest } = rawRoom;
@@ -72,7 +61,7 @@ export const convertRawRoomToRoom = (
     }
 
     const myRoomInfo = roomMemberInfos.splice(index, 1)[0];
-    const room: Room = {
+    const room: RoomData = {
       ...rest,
       currentRoomMemberInfo: myRoomInfo,
       otherRoomMemberInfos: roomMemberInfos,

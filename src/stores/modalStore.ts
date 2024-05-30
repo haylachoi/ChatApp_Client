@@ -1,30 +1,48 @@
 import { create } from 'zustand';
 
 export enum ModalElement {
-    addUser,
-    createGroup,
-    profile,
-    groupManager,
+  addUser,
+  createGroup,
+  profile,
+  groupManager,
 }
 interface useModalStoreProps {
-    isOpen: boolean;
-    currentModal?: ModalElement
-    closeModal: () => void;
-    openModal: () => void;
-    setCurrentModal: (currentModal: ModalElement | undefined) => void;
+  isOpen: boolean;
+  currentModal?: ModalElement;
+  closeModal: () => void;
+  openModal: () => void;
+  setCurrentModal: (currentModal: ModalElement | undefined) => void;
+
+  openAddUserModal: () => void;
+  openCreateGroupModal: () => void;
 }
 
-const useModalStore = create<useModalStoreProps>()((set) => ({
-    isOpen: false,
-   
-    closeModal: () => set({isOpen: false}),
-    openModal: () => set({isOpen: true}),
-    setCurrentModal: (currentModal) => set({currentModal})
+const useModalStore = create<useModalStoreProps>()((set, get) => ({
+  isOpen: false,
+
+  closeModal: () => set({ isOpen: false }),
+  openModal: () => set({ isOpen: true }),
+  setCurrentModal: (currentModal) => set({ currentModal }),
+
+  openAddUserModal: () => {
+    set({
+      currentModal: ModalElement.addUser,
+    });
+    get().openModal();
+  },
+  openCreateGroupModal: () => {
+    set({
+      currentModal: ModalElement.createGroup,
+    });
+    get().openModal();
+  },
 }));
 
-export const useIsModalOpen= () => useModalStore((state) => state.isOpen);
-export const useCurrentModal= () => useModalStore((state) => state.currentModal);
-export const useAppModalActions= () => useModalStore((state) => {
-    const {isOpen, currentModal, ...rest} = state;
+export const useIsModalOpen = () => useModalStore((state) => state.isOpen);
+export const useCurrentModal = () =>
+  useModalStore((state) => state.currentModal);
+export const useAppModalActions = () =>
+  useModalStore((state) => {
+    const { isOpen, currentModal, ...rest } = state;
     return rest;
-});
+  });

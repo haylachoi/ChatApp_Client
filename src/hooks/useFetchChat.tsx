@@ -1,13 +1,15 @@
+import { RoomIdType } from "@/libs/types";
 import { roomService } from "@/services/roomService";
 import { useRoomActions, useRoomStore } from "@/stores/roomStore";
+import { useShallow } from "zustand/react/shallow";
 
 const useFetchChat = () => {
-  const currentRoom = useRoomStore(({currentRoom: room}) => ({
-    roomId: room?.id as string,
+  const currentRoom = useRoomStore(useShallow(({currentRoom: room}) => ({
+    roomId: room?.id as RoomIdType,
     firstMessageId: room?.firstMessageId,
     lastMessageId: room?.lastMessage?.id,
     chats: room?.chats,
-  }));
+  })));
   const {
     addPreviousMesasges,
     addNextMesasges,

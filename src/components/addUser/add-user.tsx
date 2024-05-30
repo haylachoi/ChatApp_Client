@@ -3,7 +3,7 @@ import { FormEvent, useState } from "react";
 import React from "react";
 import { userService } from "@/services/userService";
 import { roomService } from "@/services/roomService";
-import { User } from "@/libs/types";
+import { User, UserIdType } from "@/libs/types";
 
 interface FormElements extends HTMLFormControlsCollection {
   searchTerm: HTMLInputElement
@@ -31,7 +31,7 @@ const AddUser = () => {
     }
   };
 
-  const handleAdd = async (id: string) => {
+  const handleAdd = async (id: UserIdType) => {
     try {
       const result = await roomService.createRoom(id)
     } catch (err) {

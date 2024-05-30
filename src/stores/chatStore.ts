@@ -1,19 +1,25 @@
-// import { MessageData } from "@/libs/types";
-// import { create } from "zustand";
+import { MessageData, RoomIdType } from "@/libs/types";
+import { create } from "zustand";
 
 
+// interface RoomChat {
+//   id: RoomIdType,
+//   chat: MessageData[];
+// }
 // interface useChatStoreProps {  
-//   currentChats: MessageData[];
-//   setCurrentChats: (currentChats: MessageData[]) => void;
-//   addChat: (chat: MessageData) => void;
+//   currentRoomChat?: RoomChat;
+//   rooms: RoomChat[];
+//   setCurrentChats: (currentChats: RoomChat) => void;
+//   addMessage: (roomId: RoomIdType,chat: MessageData) => void;
 // }
 
 // const useChatStore = create<useChatStoreProps>((set) => ({
-//   currentChats: [],
-//   setCurrentChats: (chats) => set({currentChats: chats}),
-//   addChat: (chat) => set((state) => ({ currentChats: [...state.currentChats, chat]}))
+//   rooms: [],
+//   setCurrentChats: (chats) => set({currentRoomChat: chats}),
+//   addMessage: (roomId, message) =>
+    
 // }));
 
-// export const useCurrentChats = () => useChatStore(state => state.currentChats);
+// export const useCurrentChats = () => useChatStore(state => state.currentRoomChat);
 // export const useSetCurrentChats = () => useChatStore(state => state.setCurrentChats);
-// export const useAddChat = () => useChatStore(state => state.addChat);
+// // export const useAddChat = () => useChatStore(state => state.addMessage);

@@ -1,0 +1,20 @@
+.reaction-tray {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: white;
+  border-radius: 9999px;
+  padding: 0 10px;
+  height: 22px;
+  transform: translate(-40px, 50%);
+
+  .reaction-icon {
+    color: black;
+    width: 15px;
+    height: 15px;
+  }
+}

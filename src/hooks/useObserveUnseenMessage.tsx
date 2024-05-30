@@ -1,11 +1,12 @@
 import { chatService } from '@/services/chatService';
 import { roomService } from '@/services/roomService';
+import { currentViewPortStore } from '@/stores/chatViewportStore';
 import { useCurrentChats } from '@/stores/roomStore';
 import React, { useEffect } from 'react';
 
 const useObserveUnseenMessage = (
-  chatViewportRef: React.MutableRefObject<HTMLDivElement | null>,
-  messagesRef: React.MutableRefObject<(HTMLDivElement | null)[]>,
+  viewport: HTMLDivElement | undefined,
+  unseenMessages: HTMLDivElement[]
 ) => {
   const currentChats = useCurrentChats();
   useEffect(() => {
@@ -13,7 +14,7 @@ const useObserveUnseenMessage = (
       (entries) => {
         entries.forEach((entry) => {
           const element = entry.target as HTMLElement;
-          const id = element.dataset?.id;
+          const id = element.dataset?.id as number | undefined;
           if (id !== undefined && entry.isIntersecting) {        
             console.log(id);
             roomService.updateFirstUnseenMessage(id)
@@ -24,7 +25,7 @@ const useObserveUnseenMessage = (
               })
               .catch()
               .finally(() => {
-                messagesRef.current = messagesRef.current.filter((m) => {
+                unseenMessages = unseenMessages.filter((m) => {
                   if (m?.dataset.id &&  +m.dataset.id > +id) {
                     return true;
                   }
@@ -32,32 +33,35 @@ const useObserveUnseenMessage = (
                     observer.unobserve(m);
                   }
                   return false;
-                });          
+                })
               });
           }
         });
       },
       {
-        root: chatViewportRef.current,
+        root: viewport,
         rootMargin: '0px',
         threshold: 0.5,
       },
     );
 
-    messagesRef.current?.forEach((el) => {
-      if (el) {
-        observer.observe(el);
-      }
-    });
+    // messagesRef.current?.forEach((el) => {
+    //   if (el) {
+    //     observer.observe(el);
+    //   }
+    // });
 
-    // Clean up the observer
-    return () => {
-      messagesRef.current?.forEach((el) => {
-        if (el) {
-          observer.unobserve(el);
-        }
-      });
-    };
+    unseenMessages.forEach((el) => {
+      observer.observe(el);
+    })
+    
+    // return () => {
+    //   messagesRef.current?.forEach((el) => {
+    //     if (el) {
+    //       observer.unobserve(el);
+    //     }
+    //   });
+    // };
   }, [currentChats]);
 };
 

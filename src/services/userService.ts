@@ -1,8 +1,7 @@
-import { BASE_WS_URL, REST_SEGMENT } from "@/libs/constant";
-import { HubConnectionBuilder } from "@microsoft/signalr";
-import { getAccessToken } from "./authService";
+import { REST_SEGMENT } from "@/libs/constant";
+
 import { userHub } from "./hubConnection";
-import { HubResponse, Profile, User } from "@/libs/types";
+import { HubResponse, Profile, RoomIdType, User } from "@/libs/types";
 import { httpClient } from "@/libs/httpClient";
 import { Operation } from "fast-json-patch";
 
@@ -32,7 +31,7 @@ const changeAvatar = async (file: File): Promise<string> => {
 const changeProfile = async (dif: Operation[]): Promise<HubResponse<Profile>> => {
     return userHub.invoke('ChangeProfile', dif);
 }
-const searchUserNotInRoom = async (roomId: string, searchTerm: string) => {
+const searchUserNotInRoom = async (roomId: RoomIdType, searchTerm: string) => {
     return userHub
       .invoke('SearchUserNotInRoom', roomId, searchTerm);      
 }

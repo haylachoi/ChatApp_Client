@@ -1,4 +1,4 @@
-import { HubResponse, MessageData, RawRoom, RoomMemberInfo } from '@/libs/types';
+import { HubResponse, MessageData, MessageIdType, RawRoom, RoomIdType, RoomMemberInfo, UserIdType } from '@/libs/types';
 import {clientHub, roomHub} from "./hubConnection";
 import { convertRawRoomToRoom, generatePublisher } from '@/libs/utils';
 
@@ -6,10 +6,10 @@ const connection = roomHub;
 const eventListener = clientHub;
 const subscribers = {
     joinRoom: new Map<string, (room: RawRoom) => void>(),
-    leftRoom: new Map<string, (roomId: string) => void>(),
+    leftRoom: new Map<string, (roomId: RoomIdType) => void>(),
     updateFirstUnseenMessage: new Map<string, (roomMember: RoomMemberInfo) => void>()
   }
-const getRooms = async (currentUserId: string) => {
+const getRooms = async (currentUserId: UserIdType) => {
     try {
         const result = await connection
           .invoke('GetRooms') as HubResponse<RawRoom[]>;  
@@ -24,44 +24,44 @@ const getRooms = async (currentUserId: string) => {
     }
 }
 
-const createRoom = async (friendId: string) => {
+const createRoom = async (friendId: UserIdType) => {
     return connection
       .invoke('CreateRoom', friendId);      
 }
 
 
-const updateCanMessageDisplay = async (roomId: string, canDisplay: boolean): Promise<HubResponse<RoomMemberInfo>> => {
+const updateCanMessageDisplay = async (roomId: RoomIdType, canDisplay: boolean): Promise<HubResponse<RoomMemberInfo>> => {
     return connection.invoke("UpdateCanRoomDisplay", roomId, canDisplay);
 }
 
-const updateFirstUnseenMessage = async (messageId: string): Promise<HubResponse<RoomMemberInfo>> => {
+const updateFirstUnseenMessage = async (messageId: MessageIdType): Promise<HubResponse<RoomMemberInfo>> => {
     return connection.invoke("UpdateFirstUnseenMessage", messageId);
 }
 
-const getSomeMessages = async (roomId: string): Promise<HubResponse<MessageData[]>> => {
+const getSomeMessages = async (roomId: RoomIdType): Promise<HubResponse<MessageData[]>> => {
     return await connection.invoke("GetSomeMessages", roomId) as HubResponse<MessageData[]>;
 }
 
-const getFirstMessage = async (roomId: string): Promise<HubResponse<MessageData>> => {
+const getFirstMessage = async (roomId: RoomIdType): Promise<HubResponse<MessageData>> => {
     return await connection.invoke("GetFirstMessage", roomId) as HubResponse<MessageData>;
 }
 
-const getNextMessages = async (roomId: string, messageId: string, numberMessage: number | null = 10) : Promise<HubResponse<MessageData[]>> => {
+const getNextMessages = async (roomId: RoomIdType, messageId: MessageIdType, numberMessage: number | null = 10) : Promise<HubResponse<MessageData[]>> => {
     return await connection.invoke("GetNextMessages", roomId, messageId, numberMessage) as HubResponse<MessageData[]>;
 }
 
-const getPreviousMessages = async (roomId: string, messageId: string, numberMessage: number | null = 10) : Promise<HubResponse<MessageData[]>> => {
+const getPreviousMessages = async (roomId: RoomIdType, messageId: MessageIdType, numberMessage: number | null = 10) : Promise<HubResponse<MessageData[]>> => {
     return await connection.invoke("GetPreviousMessages", roomId, messageId, numberMessage) as HubResponse<MessageData[]>;
 }
 
-const getMessagesFromTo = async (roomId: string, from: string, to: string) : Promise<HubResponse<MessageData[]>> => {
+const getMessagesFromTo = async (roomId: RoomIdType, from: MessageIdType, to: MessageIdType) : Promise<HubResponse<MessageData[]>> => {
     return await connection.invoke("GetMessagesFromTo", roomId, from, to);
 }
 const onJoinRoom = generatePublisher(subscribers.joinRoom);
 const onLeftRoom = generatePublisher(subscribers.leftRoom);
 const onUpdateFirstUnseenMessage = generatePublisher(subscribers.updateFirstUnseenMessage);
 
-eventListener.on("LeftRoom", (roomId: string) => {  
+eventListener.on("LeftRoom", (roomId: RoomIdType) => {  
     subscribers.leftRoom.forEach(eventHandler=> {
         eventHandler(roomId);
     })

@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { groupService } from '@/services/groupService';
 import { useAlertModal } from '@/stores/alertModalStore';
 import {  useCurrentRoomId, useRoomStore } from '@/stores/roomStore';
-import { RoomMemberInfo } from '@/libs/types';
+import { RoomIdType, RoomMemberInfo, UserIdType } from '@/libs/types';
 import { useCurrentUser } from '@/stores/authStore';
 import useDebounce from '@/hooks/useDebouce';
 
@@ -13,10 +13,11 @@ const GroupManager = () => {
   const currentUser = useCurrentUser();
   const otherMembers = useRoomStore((state) => state.currentRoom?.otherRoomMemberInfos) as RoomMemberInfo[];
   const groupOwner = useRoomStore((state) => state.currentRoom?.groupInfo?.groupOwner);
-  const currentRoomId = useCurrentRoomId() as string;
+  const currentRoomId = useCurrentRoomId() as RoomIdType;
   const {onOpen, setOnOk, setTitle} = useAlertModal();
   const [users, setUsers] = useState(otherMembers.map((info) => info.user));
 
+  console.log('group-manager')
   const handleSearch = (searchTerm: string) => {
     setUsers(otherMembers.filter((info) => info.user.fullname.toLowerCase().includes(searchTerm.toLowerCase())).map((info) => info.user));
   }
@@ -35,14 +36,14 @@ const GroupManager = () => {
     onOpen();
   }
 
-  const handleSetGroupOwner = (userId: string) => {
+  const handleSetGroupOwner = (userId: UserIdType) => {
     groupService.changeGroupOnwer(currentRoomId, userId).then((result) => {
 
     }).catch((error) => {
 
     });
   }
-  const handleKick = async (id: string) => {
+  const handleKick = async (id: UserIdType) => {
     try {
         var result = groupService.removeGroupMember(currentRoomId, id);        
     } catch (error) {

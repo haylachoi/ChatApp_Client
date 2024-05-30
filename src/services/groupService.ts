@@ -1,4 +1,4 @@
-import { NoDataHubResponse, User } from '@/libs/types';
+import { GroupIdType, NoDataHubResponse, RoomIdType, User, UserIdType } from '@/libs/types';
 import { REST_SEGMENT } from '@/libs/constant';
 import {  clientHub, roomHub } from './hubConnection';
 
@@ -9,36 +9,36 @@ import { httpClient } from '@/libs/httpClient';
 const connection = roomHub;
 const eventListener = clientHub;
 const subscribers = {
-  deleteGroup: new Map<string, (groupId: string) => void>(),
+  deleteGroup: new Map<string, (groupId: GroupIdType) => void>(),
   addRoomMember: new Map<string, (roomMember: RoomMemberInfo) => void>(),
-  removeRoomMember: new Map<string, (roomId: string, userId: string) => void>(),
-  changeGroupOwner: new Map<string, (roomId: string, owner: User) => void>()
+  removeRoomMember: new Map<string, (groupId: GroupIdType, userId: UserIdType) => void>(),
+  changeGroupOwner: new Map<string, (groupId: GroupIdType, owner: User) => void>()
 };
 
-const createGroup = async (name: string, groupOwnerId: string) => {
+const createGroup = async (name: string, groupOwnerId: UserIdType) => {
   const pathname = `${REST_SEGMENT.GROUP}`;
   const formData = new FormData();
   formData.append('name', name);
-  formData.append('groupOwnerId', groupOwnerId);
+  formData.append('groupOwnerId', groupOwnerId.toString());
   return httpClient.post(pathname, formData);
 };
 
-const leaveGroup = async (groupId: string): Promise<NoDataHubResponse> => {
+const leaveGroup = async (groupId: GroupIdType): Promise<NoDataHubResponse> => {
   return connection.invoke('LeaveGroup', groupId);
 }
 
-const deleteGroup = async (groupId: string) => {
+const deleteGroup = async (groupId: GroupIdType) => {
   return connection.send('DeleteGroup', groupId);
 }
-const removeGroupMember = (roomId: string, userId: string): Promise<NoDataHubResponse> => {
-  return connection.invoke('RemoveGroupMember', roomId, userId);
+const removeGroupMember = (groupId: GroupIdType, userId: UserIdType): Promise<NoDataHubResponse> => {
+  return connection.invoke('RemoveGroupMember', groupId, userId);
 };
 
-const addGroupMember = async (groupId: string, userId: string): Promise<NoDataHubResponse> => {
+const addGroupMember = async (groupId: GroupIdType, userId: UserIdType): Promise<NoDataHubResponse> => {
   return connection.invoke('AddGroupMember', groupId, userId);
 };
 
-const changeGroupOnwer = async (groupId: string, userId: string): Promise<NoDataHubResponse> => {
+const changeGroupOnwer = async (groupId: GroupIdType, userId: UserIdType): Promise<NoDataHubResponse> => {
   return connection.invoke('SetGroupOwner', {groupId, userId});
 }
 const onAddRoomMember = generatePublisher(subscribers.addRoomMember);
@@ -47,7 +47,7 @@ const onDeleteGroup = generatePublisher(subscribers.deleteGroup);
 const onChangeGroupOwner = generatePublisher(subscribers.changeGroupOwner);
 
 
-eventListener.on('DeleteGroup', (groupId: string) => {
+eventListener.on('DeleteGroup', (groupId: GroupIdType) => {
     subscribers.deleteGroup.forEach((eventHandler) => {
       eventHandler(groupId);
     });
@@ -59,15 +59,15 @@ eventListener.on('AddGroupMember', (roomMember: RoomMemberInfo) => {
     });
 });
 
-eventListener.on('RemoveGroupMember', (roomId: string, userId: string) => {
+eventListener.on('RemoveGroupMember', (groupId: GroupIdType, userId: UserIdType) => {
   subscribers.removeRoomMember.forEach((eventHandler) => {
-    eventHandler(roomId, userId);
+    eventHandler(groupId, userId);
   });
 });
 
-eventListener.on('ChangeGroupOwner', (roomId: string, owner: User) => {
+eventListener.on('ChangeGroupOwner', (groupId: GroupIdType, owner: User) => {
   subscribers.changeGroupOwner.forEach((eventHandler) => {
-    eventHandler(roomId, owner);
+    eventHandler(groupId, owner);
   });
 });
 

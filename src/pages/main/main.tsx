@@ -1,12 +1,11 @@
 import Sidebar from '@/components/sidebar/sidebar';
-import { Reaction } from '@/libs/types';
+import { Reaction, ReactionIdType } from '@/libs/types';
 import { userService } from '@/services/userService';
 import { useReactionsStore } from '@/stores/reactionStore';
 import { Heart, LucideIcon, ThumbsDown, ThumbsUp } from 'lucide-react';
 import React, { useEffect } from 'react';
 import './main.css';
 
-import { useAuthActions, useCurrentUser, useIsLogin } from '@/stores/authStore';
 import Chat from '@/components/chat/chat';
 import AppModal from '@/components/app-modal/app-modal';
 import useRoomMemberEvent from '@/hooks/useRoomMemberEvent';
@@ -31,15 +30,12 @@ import { useCurrentRoomId } from '@/stores/roomStore';
 import useUpdateFirstUnseenMessageEvent from '@/hooks/useUpdateFirstUnseenMessageEvent';
 import useReceiveMessageEvent from '@/hooks/useReceiveMessageEvent';
 import useChangeGroupOwnerEvent from '@/hooks/useChangeGroupOwnerEvent';
-import { clientHub, userHub, roomHub, chatHub } from '@/services/hubConnection';
+import useDeleteMessageDetailEvent from '@/hooks/useDeleteMessageDetailEvent';
 
 const Main = () => {
-  const currentUser = useCurrentUser();
-  if (!currentUser) return <></>;
   const currentRoomId = useCurrentRoomId();
   const hasIncommingCall = useHasIncommingCall();
   const isMakingCall = useIsMakingCall();
-
   const isVideoCallAccept = useIsVideoCallAccept();
   const { setReactions } = useReactionsStore();
   useVideoCallAcceptEvent();
@@ -51,21 +47,22 @@ const Main = () => {
   useJoinRoomEvent();
   useLeftRoomEvent();
   useChangeGroupOwnerEvent();
+  useDeleteMessageDetailEvent();
   // useConnectedUserEvent();
 
   useCallVideoEvent();
   useRejectVideoCallEvent();
   useCancelVideoCall();
   const reactionIconMapping = {
+    Heart: Heart,
     Like: ThumbsUp,
     Hate: ThumbsDown,
-    Heart: Heart
   };
   useEffect(() => {
     userService
       .getReactions()
       .then((result) => {
-        const map = new Map<string, Reaction>();
+        const map = new Map<ReactionIdType, Reaction>();
         result.data.forEach((reaction: Reaction) => {
           reaction.icon =
             reactionIconMapping[
@@ -83,9 +80,9 @@ const Main = () => {
       <div className="side-bar">
         <Sidebar />
       </div>
-      {/* <CallVideo/> */}
       <div className="main-content">
-        {currentRoomId && <Chat />}
+        {currentRoomId && <Chat/>}
+
         {/* <Detail/> */}
       </div>
       <AppModal />

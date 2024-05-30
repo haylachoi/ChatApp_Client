@@ -4,7 +4,8 @@
   width: 500px;
 
   padding: 30px;
-  background-color: rgba(17, 25, 40, 0.781);
+  background-color: hsla(219, 40%, 11%, 0.781);
+  backdrop-filter: blur(19px) saturate(180%);
   border-radius: 10px;
 
   .profile-top {

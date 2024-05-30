@@ -18,7 +18,7 @@ interface useAuthStoreProps {
   setIsLoginPage: (isLoginPage: boolean) => void;
 }
 
-const useAuthStore = create<useAuthStoreProps>()((set) => ({
+export const useAuthStore = create<useAuthStoreProps>()((set) => ({
   isLogin: false,
   isConnected: false,
   currentUser: undefined,
@@ -48,6 +48,7 @@ const useAuthStore = create<useAuthStoreProps>()((set) => ({
 export const useIsLogin = () =>  useAuthStore(state => state.isLogin);
 export const useIsConnected = () =>  useAuthStore(state => state.isConnected);
 export const useCurrentUser = () => useAuthStore(state => state.currentUser);
+export const useCurrentUserId = () => useAuthStore(state => state.currentUser?.id);
 
 export const useAuthActions = () => useAuthStore(state => {
   const {isLogin, currentUser, isConnected, ...rest} = state;

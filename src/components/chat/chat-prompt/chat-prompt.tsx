@@ -11,9 +11,10 @@ import './chat-prompt.css';
 import { useCurrentRoomId } from '@/stores/roomStore';
 import { useQuoteStore } from '@/stores/quoteStore';
 import MessageQuote from '@/components/message-quote/message-quote';
+import { RoomIdType } from '@/libs/types';
 
 const ChatPrompt = () => {
-  const currentRoomId = useCurrentRoomId() as string;
+  const currentRoomId = useCurrentRoomId() as RoomIdType;
 
   const isReceiverBlocked = false;
   const isCurrentUserBlocked = false;

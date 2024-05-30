@@ -1,13 +1,16 @@
+import { RoomIdType } from "@/libs/types";
 import { roomService } from "@/services/roomService";
+import { useChatViewportStore } from "@/stores/chatViewportStore";
 import { useRoomActions, useRoomStore } from "@/stores/roomStore";
 import { useEffect, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 const useInitChat = (scrollIntoView?: () => void) => {
-  const currentRoom = useRoomStore(({currentRoom: room}) => ({
-    roomId: room?.id as string,
+  const currentRoom = useRoomStore(useShallow(({currentRoom: room}) => ({
+    roomId: room?.id as RoomIdType,
     firstMessageId: room?.firstMessageId,
     chats: room?.chats,
-  }));
+  })));
   const {
     replaceChats,
     updateFirstMessageId,

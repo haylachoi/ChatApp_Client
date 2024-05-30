@@ -1,4 +1,4 @@
-import { User } from "@/libs/types";
+import { RoomIdType, User, UserIdType } from "@/libs/types";
 import { generatePublisher } from "@/libs/utils";
 import { chatHub, clientHub } from "./hubConnection";
 
@@ -15,18 +15,18 @@ const getUserMedia = async () => {
   return navigator.mediaDevices.getUserMedia({video: true, audio:true});
 }
 
-const callVideo = async (roomId: string, receiverId: string ,peerId: string) => {
+const callVideo = async (roomId: RoomIdType, receiverId: UserIdType ,peerId: string) => {
   return connection.invoke('CallVideo', roomId, receiverId, peerId);
 }
-const acceptVideoCall = async (callerId: string, peerId: string) => {
+const acceptVideoCall = async (callerId: UserIdType, peerId: string) => {
   return connection.invoke('AcceptVideoCall', callerId, peerId);
 }
 
-const rejectVideoCall = async (callerId: string, peerId: string) => {
+const rejectVideoCall = async (callerId: UserIdType, peerId: string) => {
   return connection.invoke('RejectVideoCall', callerId, peerId);
 }
 
-const cancelVideoCall = async (receiverId: string, peerId: string) => {
+const cancelVideoCall = async (receiverId: UserIdType, peerId: string) => {
   return connection.invoke('CancelVideoCall', receiverId, peerId);
 }
 

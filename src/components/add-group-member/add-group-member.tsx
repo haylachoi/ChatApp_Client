@@ -1,4 +1,4 @@
-import {  User } from '@/libs/types';
+import {  GroupIdType, RoomIdType, User } from '@/libs/types';
 import { userService } from '@/services/userService';
 import React, { FormEvent, useState } from 'react'
 import './add-group-member.css'
@@ -14,7 +14,7 @@ interface SearchFormElement extends HTMLFormElement {
 
 const AddGroupMember = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const currentRoomId = useCurrentRoomId() as string;
+  const currentRoomId = useCurrentRoomId() as RoomIdType;
  
 
   const handleSearch = async (e: React.FormEvent<SearchFormElement>) => {
@@ -31,7 +31,7 @@ const AddGroupMember = () => {
     }
   };
 
-  const handleAdd = async (id: string) => {
+  const handleAddGroup = async (id: GroupIdType) => {
     try {
        const result = await groupService.addGroupMember(currentRoomId, id);
        if (result.isSuccess){
@@ -56,7 +56,7 @@ const AddGroupMember = () => {
             <span>{user.fullname}</span>
           </div>
          <div className="group-btn">
-          <button className="add-member-btn" onClick={() => handleAdd(user.id)}>Thêm</button>  
+          <button className="add-member-btn" onClick={() => handleAddGroup(user.id)}>Thêm</button>  
          </div>
         </li>
       ))}

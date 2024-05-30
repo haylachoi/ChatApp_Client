@@ -1,6 +1,6 @@
 import { useChatViewportStore } from '@/stores/chatViewportStore';
 import './message-quote.css';
-import { MessageData } from '@/libs/types';
+import { MessageData, RoomIdType } from '@/libs/types';
 import { useQuoteStore } from '@/stores/quoteStore';
 import {
   useCurrentRoomId,
@@ -23,7 +23,7 @@ const MessageQuote: React.FC<MessageQuoteProps> = ({
     others: currentRoom?.otherRoomMemberInfos,
     current: currentRoom?.currentRoomMemberInfo,
   }));
-  const currentRoomId = useCurrentRoomId() as string;
+  const currentRoomId = useCurrentRoomId() as RoomIdType;
   const firstMessageId = useRoomStore((state) =>
     state.currentRoom?.chats && state.currentRoom.chats.length > 0
       ? state.currentRoom.chats[0].id
@@ -63,7 +63,7 @@ const MessageQuote: React.FC<MessageQuoteProps> = ({
     // fromId -10 to avoid fetch more data from infinite-scroll component when auto scroll to 'from element' (because it's first element)
     const result = await roomService.getMessagesFromTo(
       currentRoomId,
-      (quoteId - 10).toString(),
+      quoteId - 10,
       firstMessageId,
     );
     if (!result.isSuccess || result.data.length === 0) return;
