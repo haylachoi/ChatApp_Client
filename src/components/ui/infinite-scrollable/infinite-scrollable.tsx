@@ -1,5 +1,5 @@
 import { ArrowDownToLine } from 'lucide-react';
-import './infinite-scrollable.css'
+import './infinite-scrollable.css';
 import React, {
   UIEventHandler,
   useRef,
@@ -33,29 +33,30 @@ const InfiniteScrollable = forwardRef<
   ) => {
     const viewportRef = useRef<HTMLDivElement | null>(null);
     const lastRef = useRef<HTMLDivElement | null>(null);
-    const goToLastRef = useRef<HTMLButtonElement | null>(null)
-
+    const goToLastRef = useRef<HTMLButtonElement | null>(null);
 
     const [isFetchingPreviousMessage, setIsFetchingPreviousMessage] =
       useState(false);
     const [isFetchingNextMessage, setIsFetchingNextMessage] = useState(false);
-    const [scrollTop, setScrollTop] = useState(0);
+    const scrollTopRef = useRef(0);
 
+    console.log('render scrollable')
     const handleScroll: UIEventHandler<HTMLDivElement> | undefined = async (
       e,
     ) => {
       const element = e.currentTarget;
+      const scrollTop = scrollTopRef.current;
       let a = element.scrollTop;
       let b = element.scrollHeight - element.clientHeight;
       let c = a / b;
 
       const isScrollDown = element.scrollTop > scrollTop;
       if (a > b - 600) {
-          goToLastRef.current?.classList.remove("show");
-        } else {
-          goToLastRef.current?.classList.add("show");
+        goToLastRef.current?.classList.remove('show');
+      } else {
+        goToLastRef.current?.classList.add('show');
       }
-      
+
       if (
         a < 200 &&
         canFetchPrevious &&
@@ -85,11 +86,13 @@ const InfiniteScrollable = forwardRef<
         }
       }
 
-      setScrollTop(element.scrollTop);
+      scrollTopRef.current = element.scrollTop;
     };
-    const handleGoToLast: React.MouseEventHandler<HTMLButtonElement> | undefined = (e) => {
-        lastRef.current?.scrollIntoView({ behavior: "smooth"});
-    }
+    const handleGoToLast:
+      | React.MouseEventHandler<HTMLButtonElement>
+      | undefined = (e) => {
+      lastRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
     return (
       <div
         className={`${className} infinite-scrollable`}
@@ -104,11 +107,20 @@ const InfiniteScrollable = forwardRef<
             }
           }
         }}>
+        {isFetchingPreviousMessage && (
+          <div className="fetching-indicator fetching-previous-indicator">.</div>
+        )}
         {children}
+        {isFetchingNextMessage && (
+          <div className="fetching-indicator fetching-next-indicator">.</div>
+        )}
         <div ref={lastRef}></div>
-        <button className="go-to-last-btn" onClick={handleGoToLast} ref={goToLastRef}>
-            <ArrowDownToLine/>
-        </button> 
+        <button
+          className="go-to-last-btn"
+          onClick={handleGoToLast}
+          ref={goToLastRef}>
+          <ArrowDownToLine />
+        </button>
       </div>
     );
   },

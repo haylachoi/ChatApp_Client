@@ -1,0 +1,37 @@
+.message-quote {
+  position: relative;
+  margin-bottom: 10px;
+  background-color: var(--background-color-secondary);
+  padding: 20px;
+ 
+  h4 {
+    text-align: left;
+    /* color: var(--name-color); */
+  }
+  .quote-text {
+    text-align: left;
+    white-space:pre-wrap; word-wrap:break-word;
+  }
+
+  .quote-img {
+    max-height: 100px;
+    height: auto;
+    width: auto;
+    object-fit: scale-down;
+  }
+  .card {
+    border: none;
+    width: 100%;
+    border-left: 4px solid #5183fe;
+    padding: 4px 10px;
+    outline: none;
+    background-color: transparent;
+    cursor: pointer;
+  }
+
+  .delete-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+}

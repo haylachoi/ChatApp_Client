@@ -1,0 +1,51 @@
+.group-manager{
+    --button-width: 100px;
+    --button-height: 50px;
+    width: 600px;
+    height: clamp(300px, 40vh + 5rem ,800px);
+    padding: 30px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      .btn-delete-group {
+        color: var(--red);
+        font-weight: 700;
+      }
+    }
+    form{
+      display: flex;
+      gap: 20px;
+  
+      input{
+        height: var(--button-height);
+        padding: 20px;
+        border-radius: 10px;
+        border: none;
+        outline: none;
+        width: 100%;
+      }
+  
+      button{
+        display: grid;
+        place-items: center;
+        width: var(--button-width);
+        height: var(--button-height);
+        border-radius: 10px;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+    }
+  
+    ul {
+      overflow-y: auto;
+    
+    }
+  }

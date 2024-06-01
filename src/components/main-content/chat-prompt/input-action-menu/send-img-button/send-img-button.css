@@ -1,0 +1,10 @@
+.send-img-btn {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  
+  label {
+    cursor: pointer;
+
+  }
+}

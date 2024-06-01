@@ -1,19 +1,18 @@
-import { RoomIdType } from "@/libs/types";
-import { roomService } from "@/services/roomService";
-import { useRoomActions, useRoomStore } from "@/stores/roomStore";
-import { useShallow } from "zustand/react/shallow";
+import { RoomIdType } from '@/libs/types';
+import { roomService } from '@/services/roomService';
+import { useRoomActions, useRoomStore } from '@/stores/roomStore';
+import { useShallow } from 'zustand/react/shallow';
 
 const useFetchChat = () => {
-  const currentRoom = useRoomStore(useShallow(({currentRoom: room}) => ({
-    roomId: room?.id as RoomIdType,
-    firstMessageId: room?.firstMessageId,
-    lastMessageId: room?.lastMessage?.id,
-    chats: room?.chats,
-  })));
-  const {
-    addPreviousMesasges,
-    addNextMesasges,
-  } = useRoomActions();
+  const currentRoom = useRoomStore(
+    useShallow(({ currentRoom: room }) => ({
+      roomId: room?.id as RoomIdType,
+      firstMessageId: room?.firstMessageId,
+      lastMessageId: room?.lastMessage?.id,
+      chats: room?.chats,
+    })),
+  );
+  const { addPreviousMesasges, addNextMesasges } = useRoomActions();
   const canFetchPrevious =
     currentRoom.chats == undefined ||
     currentRoom.firstMessageId == undefined ||
@@ -26,7 +25,8 @@ const useFetchChat = () => {
     currentRoom.lastMessageId == undefined ||
     currentRoom.chats.length == 0
       ? undefined
-      : +currentRoom.chats[currentRoom.chats.length - 1].id < +currentRoom.lastMessageId;
+      : +currentRoom.chats[currentRoom.chats.length - 1].id <
+        +currentRoom.lastMessageId;
 
   const fetchPrevious = async () => {
     if (!currentRoom.chats) return;
@@ -48,8 +48,13 @@ const useFetchChat = () => {
     );
     addNextMesasges(currentRoom.roomId, result.data);
   };
-  
-  return { canFetchPrevious: !!canFetchPrevious, canFetchNext: !!canFetchNext, fetchPrevious, fetchNext}
-}
 
-export default useFetchChat
+  return {
+    canFetchPrevious: !!canFetchPrevious,
+    canFetchNext: !!canFetchNext,
+    fetchPrevious,
+    fetchNext,
+  };
+};
+
+export default useFetchChat;

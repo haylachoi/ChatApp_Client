@@ -1,24 +1,52 @@
 .infinite-scrollable {
-    .go-to-last-btn {
-        position: sticky;
-        outline: none;
-        border: none;
-        bottom: 15px;
-        left: 100%;
-        opacity: 0;
-        width: 35px;
-        height: 35px;
-        border-radius: 10px;
-        background-color: hsla(59, 72%, 59%, 0.8);
-        display: none;
-        cursor: pointer;
-        transition: all 1.5s;
-        &:hover {
-            opacity: 0.5;
-        }
+  position: relative;
+  .go-to-last-btn {
+    position: sticky;
+    outline: none;
+    border: none;
+    bottom: 15px;
+    left: 100%;
+    opacity: 0;
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    background-color: hsla(59, 72%, 59%, 0.8);
+    display: none;
+    cursor: pointer;
+    transition: all 1.5s;
+    &:hover {
+      opacity: 0.5;
     }
-    .show {
-        opacity: 0.2;
-        display: block;
-    }
+  }
+  .show {
+    opacity: 0.2;
+    display: block;
+  }
+
+  .fetching-indicator{
+    height: 24px;
+    width: 24px;
+    color: var(--background-color);
+    border-left: 4px solid white;
+    position: relative;
+    border-radius: 9999px;
+    transform: translateX(-50%);
+    left: 50%;
+    animation: around 2s infinite linear;
+  }
+
+  /* .fetching-previous-indicator {
+
+  }
+  .fetching-next-indicator {
+
+  } */
+}
+@keyframes around {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

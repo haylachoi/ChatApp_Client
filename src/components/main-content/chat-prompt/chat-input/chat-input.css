@@ -1,0 +1,42 @@
+.chat-input {
+  flex: 1;
+  background-color: rgba(17, 25, 40, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  position: relative;
+  align-self: flex-end;
+  z-index: 100;
+  padding: 20px;
+  .text-input {
+    width: 100%;
+    border: none;
+    background-color: transparent;
+    outline: none;
+    color: white;
+    padding: 0;
+    font-size: 16px;
+    resize: none;
+    /* height: 60px; */
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+  
+  .quote-message {
+    position: relative;
+    margin-bottom: 10px;
+    background-color: var(--background-color-secondary);
+    padding: 20px;
+
+    .card {
+      border-left: 4px solid #5183fe;
+      padding: 4px 10px
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+  }
+}

@@ -16,4 +16,3 @@ function useDebounce(callback: Function, delay: number) {
 }
 
 export default useDebounce;
-

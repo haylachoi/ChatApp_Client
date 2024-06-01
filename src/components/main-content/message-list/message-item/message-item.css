@@ -1,0 +1,68 @@
+.message-item {
+  display: flex;
+  gap: 10px;
+  position: relative;
+  align-self: start;
+  max-width: 70%;
+  min-width: 150px;
+  &.own {
+    align-self: flex-end;
+    .message-wrapper {
+      background-color: #5183fe;
+    }
+  }
+
+  .message-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background-color: rgba(17, 25, 40, 0.8);
+
+  }
+  .reaction-wrapper {
+    visibility: hidden;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    transform: translate(-10%, 50%);
+    opacity: 0.2;
+    transition: all 0.5s;
+    &:hover ~ .quote-wrapper {
+      visibility: hidden;
+    }
+
+    &:has(~ .quote-wrapper:hover) {
+      visibility: hidden;
+    }
+  }
+
+  &:hover {
+    .reaction-wrapper {
+      visibility: visible;
+      opacity: 1;
+      transition: all 0.5s;
+    }
+  }
+  
+  .quote-wrapper {
+    visibility: hidden;
+    opacity: 0.5;
+    transition: opacity .5s ease, visibility 0s .5s; 
+    
+    &:hover ~ .reaction-wrapper{
+      visibility: hidden !important;
+    }
+  }
+
+  &:hover {
+    .quote-wrapper {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity .5s ease, visibility 0s 0s; 
+    }
+  }
+
+}

@@ -4,8 +4,8 @@ import { toast } from "react-toastify";
 import React from "react";
 import { authService, setToken } from "../../services/authService";
 import { useAuthActions } from "@/stores/authStore";
-import Login from "@/components/login/login";
-import Register from "@/components/register/register";
+import Login from "@/components/auth/login/login";
+import Register from "@/components/auth/register/register";
 
 const Auth = () => {
   // const [avatar, setAvatar] = useState<string>('');

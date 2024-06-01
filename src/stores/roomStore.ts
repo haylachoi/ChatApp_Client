@@ -37,8 +37,6 @@ interface useRoomStoreProps {
 
   addPreviousMesasges: (roomId: RoomIdType, chats: MessageData[]) => void;
   addNextMesasges: (roomId: RoomIdType, chats: MessageData[]) => void;
-
-  setViewportScrollTop: (roomId: RoomIdType, scrollTop: number) => void;
 }
 
 export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
@@ -74,9 +72,11 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
 
   addRoomMember: (roomMemberInfo) =>
     set((state) => {
-      let room = state.rooms.find((room) => room.id == roomMemberInfo.roomId);
-      if (!room) return state;
+      const roomIndex = state.rooms.findIndex(r => r.id === roomMemberInfo.roomId);
+      if (roomIndex < 0) 
+        return state;
 
+      const room = {...state.rooms[roomIndex]};
       const existedRoomMember = room.otherRoomMemberInfos.find(
         (info) => info.user.id === roomMemberInfo.user.id,
       );
@@ -88,12 +88,15 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
         ...room.otherRoomMemberInfos,
         roomMemberInfo,
       ];
-      return { ...state, rooms: [...state.rooms] };
+
+      const rooms = [...state.rooms];
+      rooms[roomIndex] = room;
+      if (state.currentRoom?.id === room.id)
+        return {rooms, currentRoom: room};
+      return { rooms };
     }),
   updateRoomMember: (roomMemberInfo) =>
     set((state) => {
-     
-      
       const roomIndex = state.rooms.findIndex(r => r.id === roomMemberInfo.roomId);
       if (roomIndex < 0)
         return state;
@@ -116,8 +119,11 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
     }),
   removeRoomMember: (roomId, userId) =>
     set((state) => {
-      let room = state.rooms.find((room) => room.id == roomId);
-      if (!room) return state;
+      const roomIndex = state.rooms.findIndex(r => r.id === roomId);
+      if (roomIndex < 0) 
+        return state;
+
+      const room = {...state.rooms[roomIndex]};
 
       const existedRoomMember = room.otherRoomMemberInfos.find(
         (info) => info.user.id === userId,
@@ -128,7 +134,12 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
       room.otherRoomMemberInfos = room.otherRoomMemberInfos.filter(
         (info) => info.user.id !== userId,
       );
-      return { rooms: [...state.rooms] };
+
+      const rooms = [...state.rooms];
+      rooms[roomIndex] = room;
+      if (roomId === state.currentRoom?.id)
+        return {rooms, currentRoom: room};
+      return { rooms };
     }),
 
   changeGroupOwner: (roomId, owner) =>
@@ -239,54 +250,49 @@ export const useRoomStore = create<useRoomStoreProps>()((set, get) => ({
     set((state) => {
       if (messages.length <1)
         return state;
-      let room = state.rooms.find((room) => room.id == roomId);
-      if (!room) return state;
+      
+      const roomIndex = state.rooms.findIndex(r => r.id === roomId);
+      if (roomIndex < 0) 
+        return state;
 
-      // const roomIndex = state.rooms.findIndex(r => r.id === roomId);
-      // if (roomIndex < 0) 
-      //   return state;
-
-      // const room = {...state.rooms[roomIndex]};
+      const room = {...state.rooms[roomIndex]};
 
       if (!room.chats) room.chats = messages;
       else if(messages[messages.length -1].id < room.chats[0].id) {
         room.chats = [...messages, ...room.chats];
       }
-
-      // state.rooms[roomIndex] = room;
+      const rooms = [...state.rooms];
+      rooms[roomIndex] = room;
       if (roomId === state.currentRoom?.id) {
-        return {rooms: [...state.rooms], currentRoom: room}
+        return {rooms: rooms, currentRoom: room}
       }
-      return { rooms: [...state.rooms] };
+      return { rooms: rooms };
     }),
   addNextMesasges: (roomId, messages) =>
     set((state) => {
       if (messages.length <1)
         return state;
-      let room = state.rooms.find((room) => room.id == roomId);
-      if (!room) return state;
-      console.log(room.chats, messages)
+      const roomIndex = state.rooms.findIndex(r => r.id === roomId);
+      if (roomIndex < 0) 
+        return state;
+
+      const room = {...state.rooms[roomIndex]};
+
       if (!room.chats) room!.chats = messages;
       else if (room.chats[room.chats.length-1].id < messages[0].id) {
         room.chats = [...room.chats, ...messages];
       }
+
+     const rooms = [...state.rooms];
+      rooms[roomIndex] = room;
       if (roomId === state.currentRoom?.id) {
-        return {rooms: [...state.rooms], currentRoom: room}
+        return {rooms: rooms, currentRoom: room}
       }
-      return { rooms: [...state.rooms] };
+      return { rooms: rooms };
     }),
 
-  setViewportScrollTop: (roomId, scrollTop) =>
-    set((state) => {
-      let room = state.rooms.find((room) => room.id == roomId);
-      if (!room) return state;
-
-      room.viewportTop = scrollTop;
-      return state;
-    }),
 }));
 
-// export const useCurrentRoom = () => useRoomStore(state => state.currentRoom);
 export const useRooms = () => useRoomStore((state) => state.rooms);
 
 export const useCurrentChats = () =>
@@ -295,12 +301,11 @@ export const useCurrentChats = () =>
 export const useCurrentRoomId = () =>
   useRoomStore((state) => state.currentRoom?.id);
 
-export const useIsCurrentRoomGroup = () =>
-  useRoomStore((state) => state.currentRoom?.isGroup);
+// export const useIsCurrentRoomGroup = () =>
+//   useRoomStore((state) => state.currentRoom?.isGroup);
 
 export const useRoomActions = () =>
   useRoomStore(useShallow((state) => ({
-    // setCurrentViewportRef: state.setCurrentViewportRef,
     setCurrentRoom: state.setCurrentRoom,
     setRooms: state.setRooms,
     fetchRooms: state.fetchRooms,
@@ -323,6 +328,4 @@ export const useRoomActions = () =>
 
     addPreviousMesasges: state.addPreviousMesasges,
     addNextMesasges: state.addNextMesasges,
-
-    setViewportScrollTop: state.setViewportScrollTop,
   })));

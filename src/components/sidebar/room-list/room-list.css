@@ -1,0 +1,4 @@
+.room-list {
+  overflow-y: auto;
+  height: 100%;
+}

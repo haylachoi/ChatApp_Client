@@ -59,7 +59,6 @@ export const convertRawRoomToRoom = (
     if (index === -1) {
       return;
     }
-
     const myRoomInfo = roomMemberInfos.splice(index, 1)[0];
     const room: RoomData = {
       ...rest,
@@ -67,9 +66,6 @@ export const convertRawRoomToRoom = (
       otherRoomMemberInfos: roomMemberInfos,
       chats: undefined,
     };
-    // if (lastMessage) {
-    //   room.lastMessage = convertRawMessageToMessage(lastMessage);
-    // }
 
     if (room.isGroup) {
       room.name = room.groupInfo?.name;

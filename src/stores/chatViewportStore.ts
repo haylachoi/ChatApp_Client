@@ -1,42 +1,37 @@
 import { RoomIdType } from "@/libs/types";
-import { create } from "zustand"
 
-interface useChatViewportStoreProps {
-  currentViewportRef?: React.MutableRefObject<HTMLDivElement | null>;
 
-  scrollTops: {
+class ViewPortStore {
+  public chatViewport?: HTMLElement;
+  public firstUnseenMessage?: HTMLDivElement;
+  public lastMessage?: HTMLDivElement;
+  public unseenMessages: HTMLDivElement[] = [];
+  public scrollTopCache: {
     roomId: RoomIdType,
-    scrollTop: number;
-  }[];
-  setCurrentViewportRef: (
-    ref: React.MutableRefObject<HTMLDivElement | null>,
-  ) => void;
+    scrollTop: number
+  }[] = []
+
+  public resetCurrentViewPortStore = () => {
+    this.chatViewport= undefined;
+    this.firstUnseenMessage = undefined;
+    this.lastMessage = undefined;
+    this.unseenMessages = [];
+  }
+
+  public cacheScrollTop = (roomId: RoomIdType) => {
+    const viewport = this.chatViewport;
+   if (viewport) {
+    const scrollTop = viewport.scrollTop;
+    const cache = this.scrollTopCache.find(c => c.roomId === roomId);
+    if (cache) {
+      cache.scrollTop = scrollTop;
+      return;
+    }
+    currentViewPortStore.scrollTopCache.push({
+      roomId,
+      scrollTop
+    })
+   }
+  }
 }
-
-export const useChatViewportStore = create<useChatViewportStoreProps>()((set) => ({
-  scrollTops: [],
-  setCurrentViewportRef: (ref) => set({ currentViewportRef: ref }),
-
-}))
-
-export const useChatViewportActions = () => useChatViewportStore((state) => ({
-  setCurrentViewportRef: state.setCurrentViewportRef,
-}));
-
-
-interface CurrentViewPortStoreProps {
-  chatViewport?: HTMLDivElement;
-  firstUnseenMessage?: HTMLDivElement;
-  lastMessage?: HTMLDivElement;
-  unseenMessages: HTMLDivElement[];
-}
-export const currentViewPortStore: CurrentViewPortStoreProps = {
-  unseenMessages: [],
-}
-
-export const resetCurrentViewPortStore = () => {
-  currentViewPortStore.chatViewport= undefined;
-  currentViewPortStore.firstUnseenMessage = undefined;
-  currentViewPortStore.lastMessage = undefined;
-  currentViewPortStore.unseenMessages = [];
-}
+export const currentViewPortStore = new ViewPortStore();

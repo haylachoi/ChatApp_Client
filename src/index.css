@@ -57,6 +57,13 @@ body {
   background-color: transparent;
 }
 
+.text-white {
+  color: white;
+}
+.size-m {
+  width: 20px;
+  height: 20px;
+}
 .text-green {
   color: var(--green);
 }

@@ -6,31 +6,31 @@ import { Heart, LucideIcon, ThumbsDown, ThumbsUp } from 'lucide-react';
 import React, { useEffect } from 'react';
 import './main.css';
 
-import Chat from '@/components/chat/chat';
 import AppModal from '@/components/app-modal/app-modal';
-import useRoomMemberEvent from '@/hooks/useRoomMemberEvent';
-import useReactionEvent from '@/hooks/useReactionEvent';
-import CallVideo from '@/components/call-video/call-video';
+import useRoomMemberEvent from '@/hooks/event/room/useRoomMemberEvent';
+import CallVideo from '@/components/modal-content/call-video/call-video';
 import {
   useHasIncommingCall,
   useIsMakingCall,
   useIsVideoCallAccept,
 } from '@/stores/videoCallStore';
-import IncommingCallAlert from '@/components/incomming-call-alert/incomming-call-alert';
-import CallAlert from '@/components/call-alert/call-alert';
-import useVideoCallAcceptEvent from '@/hooks/useVideoCallAcceptEvent';
-import useRejectVideoCallEvent from '@/hooks/useRejectVideoCallEvent';
-import useCancelVideoCall from '@/hooks/useCancelVideoCall';
-import useCallVideoEvent from '@/hooks/useCallVideoEvent';
+import IncommingCallAlert from '@/components/modal-content/incomming-call-alert/incomming-call-alert';
+import CallAlert from '@/components/modal-content/call-alert/call-alert';
+import useVideoCallAcceptEvent from '@/hooks/event/videoCall/useVideoCallAcceptEvent';
+import useRejectVideoCallEvent from '@/hooks/event/videoCall/useRejectVideoCallEvent';
+import useCancelVideoCallEvent from '@/hooks/event/videoCall/useCancelVideoCallEvent';
 import AlertModal from '@/components/ui/alert-modal/alert-modal';
-import useDeleteGroupEvent from '@/hooks/useDeleteGroupEvent';
-import useJoinRoomEvent from '@/hooks/useJoinRoomEvent';
-import useLeftRoomEvent from '@/hooks/useLeftRoomEvent';
+import useDeleteGroupEvent from '@/hooks/event/room/useDeleteGroupEvent';
+import useJoinRoomEvent from '@/hooks/event/room/useJoinRoomEvent';
+import useLeftRoomEvent from '@/hooks/event/room/useLeftRoomEvent';
 import { useCurrentRoomId } from '@/stores/roomStore';
-import useUpdateFirstUnseenMessageEvent from '@/hooks/useUpdateFirstUnseenMessageEvent';
-import useReceiveMessageEvent from '@/hooks/useReceiveMessageEvent';
-import useChangeGroupOwnerEvent from '@/hooks/useChangeGroupOwnerEvent';
-import useDeleteMessageDetailEvent from '@/hooks/useDeleteMessageDetailEvent';
+import useUpdateFirstUnseenMessageEvent from '@/hooks/event/chat/useUpdateFirstUnseenMessageEvent';
+import useReceiveMessageEvent from '@/hooks/event/chat/useReceiveMessageEvent';
+import useChangeGroupOwnerEvent from '@/hooks/event/room/useChangeGroupOwnerEvent';
+import useDeleteMessageDetailEvent from '@/hooks/event/chat/useDeleteMessageDetailEvent';
+import MainContent from '@/components/main-content/main-content';
+import useCallVideoEvent from '@/hooks/event/videoCall/useCallVideoEvent';
+import useReactionEvent from '@/hooks/event/chat/useReactionEvent';
 
 const Main = () => {
   const currentRoomId = useCurrentRoomId();
@@ -52,7 +52,7 @@ const Main = () => {
 
   useCallVideoEvent();
   useRejectVideoCallEvent();
-  useCancelVideoCall();
+  useCancelVideoCallEvent();
   const reactionIconMapping = {
     Heart: Heart,
     Like: ThumbsUp,
@@ -80,9 +80,8 @@ const Main = () => {
       <div className="side-bar">
         <Sidebar />
       </div>
-      <div className="main-content">
-        {currentRoomId && <Chat/>}
-
+      <div className="main-content-area">
+        {currentRoomId && <MainContent/>}
         {/* <Detail/> */}
       </div>
       <AppModal />

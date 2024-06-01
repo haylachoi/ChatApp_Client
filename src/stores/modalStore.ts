@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 export enum ModalElement {
   addUser,
+  addRoomMember,
   createGroup,
   profile,
   groupManager,
@@ -15,9 +16,10 @@ interface useModalStoreProps {
 
   openAddUserModal: () => void;
   openCreateGroupModal: () => void;
+  openAddRoomMemberModal: () => void;
 }
 
-const useModalStore = create<useModalStoreProps>()((set, get) => ({
+export const useModalStore = create<useModalStoreProps>()((set, get) => ({
   isOpen: false,
 
   closeModal: () => set({ isOpen: false }),
@@ -33,6 +35,12 @@ const useModalStore = create<useModalStoreProps>()((set, get) => ({
   openCreateGroupModal: () => {
     set({
       currentModal: ModalElement.createGroup,
+    });
+    get().openModal();
+  },
+  openAddRoomMemberModal: () => {
+    set({
+      currentModal: ModalElement.addRoomMember,
     });
     get().openModal();
   },

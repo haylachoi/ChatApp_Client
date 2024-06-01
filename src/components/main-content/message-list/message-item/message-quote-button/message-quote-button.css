@@ -1,0 +1,9 @@
+.quote-btn {
+  width: 24px;
+  height: 24px;
+  color: white;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  transform: translateX(150%);
+}

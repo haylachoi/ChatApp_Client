@@ -57,7 +57,6 @@ export interface RoomData extends Omit<RawRoom, "roomMemberInfos"> {
     name?: string;
     avatar?: string;
     isFetched?: boolean;
-    viewportTop?: number;
 }
 
 export interface RoomMemberInfo {  
