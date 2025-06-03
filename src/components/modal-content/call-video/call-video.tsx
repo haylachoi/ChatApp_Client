@@ -1,37 +1,56 @@
 import {
-  useHasIncommingCall,
   useVideoCaller,
   useVideoReceiver,
+  useHasIncommingCall,
+  useVideoCallActions,
+  useCurrentPeer,
 } from '@/stores/videoCallStore';
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
+import { PhoneMissed } from 'lucide-react';
 import './call-video.css';
 import useMediaConnection from '@/hooks/useMediaConnection';
-import { PhoneMissed } from 'lucide-react';
+import { videoCallService } from '@/services/videoCallService';
 
 const CallVideo = () => {
-  const remoteVideoRef: React.LegacyRef<HTMLVideoElement> | undefined =
-    useRef(null);
-
-  const hasIncommingCall = useHasIncommingCall();
-  const call = useMediaConnection();
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const caller = useVideoCaller();
   const receiver = useVideoReceiver();
+  const hasIncommingCall = useHasIncommingCall();
+  const peer = useCurrentPeer();
+  const {
+    setIsAccept,
+    setHasIncommingCall,
+    setIsMakingCall,
+    createCurrentPeer,
+  } = useVideoCallActions();
+  
+  const onError= () => {
+    const target = hasIncommingCall ? caller : receiver;
+    if (target) {
+      videoCallService.finishVideoCall(target.id, peer.id);
+    }
+    setIsAccept(false);
+    setHasIncommingCall(false);
+    setIsMakingCall(false);
+    peer.destroy();
+    createCurrentPeer();
+  }
+
+   useMediaConnection({
+    onRemoteStream: (remoteStream) => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
+    },
+    onError,
+    caller,
+    receiver
+  });
 
   const handleEndCall = () => {
-    if (call) {
-      call.close();
-    }
+    onError();
   };
-
-  useEffect(() => {
-    if (!call) return;
-
-    call.on('stream', (remoteStream) => {
-      if (!remoteVideoRef.current) return;
-      remoteVideoRef.current.srcObject = remoteStream;
-    });
-  }, [call]);
 
   return (
     <div className="call-video-area bg-darker">

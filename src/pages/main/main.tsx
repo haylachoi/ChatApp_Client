@@ -31,6 +31,7 @@ import useDeleteMessageDetailEvent from '@/hooks/event/chat/useDeleteMessageDeta
 import MainContent from '@/components/main-content/main-content';
 import useCallVideoEvent from '@/hooks/event/videoCall/useCallVideoEvent';
 import useReactionEvent from '@/hooks/event/chat/useReactionEvent';
+import useFinishVideoCallEvent from '@/hooks/event/videoCall/useFinishVideoCallEvent';
 
 const Main = () => {
   const currentRoomId = useCurrentRoomId();
@@ -53,6 +54,7 @@ const Main = () => {
   useCallVideoEvent();
   useRejectVideoCallEvent();
   useCancelVideoCallEvent();
+  useFinishVideoCallEvent();
   const reactionIconMapping = {
     Heart: Heart,
     Like: ThumbsUp,

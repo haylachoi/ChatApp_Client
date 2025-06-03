@@ -15,3 +15,7 @@ After the successfull installation of the packages: `yarn dev`
 ## Test
 
 Run `yarn test` to run testing
+
+## todo
+  
+- fix ater send message, scroll up to load old messages make scroll focus to newest messages

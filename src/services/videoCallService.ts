@@ -9,6 +9,7 @@ const subscribers = {
   acceptVideoCall: new Map<string, (peerId: string) => void>(),
   rejectVideoCall: new Map<string, (peerId: string) => void>(),
   cancelVideoCall: new Map<string, (peerId: string) => void>(),
+  finishVideoCall: new Map<string, (peerId: string) => void>(),
 };
 
 const getUserMedia = async () => {
@@ -30,11 +31,16 @@ const cancelVideoCall = async (receiverId: UserIdType, peerId: string) => {
   return connection.invoke('CancelVideoCall', receiverId, peerId);
 }
 
+const finishVideoCall = async (receiverId: UserIdType, peerId: string) => {
+  return connection.invoke('FinishVideoCall', receiverId, peerId);
+}
+
 
 const onCallVideo = generatePublisher(subscribers.callVideo);
 const onAcceptVideoCall = generatePublisher(subscribers.acceptVideoCall);
 const onRejectVideoCall = generatePublisher(subscribers.rejectVideoCall);
 const onCancelVideoCall = generatePublisher(subscribers.cancelVideoCall);
+const onFinishVideoCall = generatePublisher(subscribers.finishVideoCall);
 
 eventListener.on('CallVideo', (roomId: string, peerId: string, caller: User) => {
   subscribers.callVideo.forEach((eventHandler) => {
@@ -59,15 +65,23 @@ eventListener.on('CancelVideoCall', (peerId: string) => {
     evenHandler(peerId);
   })
 })
+
+eventListener.on('FinishVideoCall', (peerId: string) => {
+  subscribers.finishVideoCall.forEach((evenHandler) => {
+    evenHandler(peerId);
+  })
+})
 export const videoCallService = {
   getUserMedia,
   callVideo,
   acceptVideoCall,
   rejectVideoCall,
   cancelVideoCall,
+  finishVideoCall,
 
   onAcceptVideoCall,
   onRejectVideoCall,
   onCancelVideoCall,
+  onFinishVideoCall,
   onCallVideo,
 };
