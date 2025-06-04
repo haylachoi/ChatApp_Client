@@ -6,8 +6,30 @@ import { useCurrentUser } from '@/stores/authStore';
 import { useRoomStore } from '@/stores/roomStore';
 import { currentViewPortStore } from '@/stores/chatViewportStore';
 
+function isChildVisibleInParent(
+  child: HTMLElement,
+  parent: HTMLElement,
+  threshold = 0.3,
+): boolean {
+  const childRect = child.getBoundingClientRect();
+  const parentRect = parent.getBoundingClientRect();
+
+  // Tính phần giao nhau giữa child và parent
+  const intersectionTop = Math.max(childRect.top, parentRect.top);
+  const intersectionBottom = Math.min(childRect.bottom, parentRect.bottom);
+
+  const visibleHeight = intersectionBottom - intersectionTop;
+  const childHeight = childRect.height;
+
+  // Nếu không có giao nhau (ẩn hoàn toàn)
+  if (visibleHeight <= 0) return false;
+
+  // So sánh tỷ lệ phần tử con hiển thị với threshold
+  const visibleRatio = visibleHeight / childHeight;
+  return visibleRatio >= threshold;
+}
+
 const useScrollWhenAddMessage = () => {
-  const currentUser = useCurrentUser() as Profile;
   const currentRoom = useRoomStore(({ currentRoom: room }) => ({
     roomId: room?.id as RoomIdType,
     chats: room?.chats,
@@ -26,18 +48,25 @@ const useScrollWhenAddMessage = () => {
       receicedMessageRef.current ==
         +currentViewPortStore.lastMessage?.dataset.id
     ) {
-      const lastMessage = currentRoom.chats[currentRoom.chats.length - 1];
-      if (
-        isLastMessageInViewRef.current &&
-        lastMessage.senderId !== currentUser.id
-      ) {
-        currentViewPortStore.lastMessage?.scrollIntoView({
+      // const lastMessage = currentRoom.chats[currentRoom.chats.length - 1];
+      if (isLastMessageInViewRef.current) {
+        lastMessage?.scrollIntoView({
           behavior: 'smooth',
         });
-      } else if (lastMessage.senderId === currentUser.id) {
-        currentViewPortStore.lastMessage?.scrollIntoView({
-          behavior: 'smooth',
-        });
+      } else if (currentRoom.chats.length > 1) {
+        const secondLastMessage =
+          currentRoom.chats[currentRoom.chats.length - 2];
+        const lastMessageElement = viewport?.querySelector(
+          `[data-id='${secondLastMessage.id}']`,
+        ) as HTMLElement | null;
+        if (lastMessageElement && viewport) {
+          const visible = isChildVisibleInParent(lastMessageElement, viewport);
+          if (visible) {
+            lastMessageElement.scrollIntoView({
+              behavior: 'smooth',
+            });
+          }
+        }
       }
     }
   }, [currentRoom.chats]);

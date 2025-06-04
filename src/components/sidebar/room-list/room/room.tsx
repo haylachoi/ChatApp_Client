@@ -13,12 +13,11 @@ const Room: React.FC<RoomProps> = ({ room }) => {
   const currentUserId = useAuthStore((state) => state.currentUser?.id);
   const currentRoomId = useCurrentRoomId() as RoomIdType;
   const { setCurrentRoom } = useRoomActions();
-  console.log('room');
   const lastMessageSenderName =
     room.lastMessage?.senderId == currentUserId
       ? 'Bạn'
       : room.otherRoomMemberInfos.find(
-          (rm) => rm.user.id === room.lastMessage?.senderId ?? 0,
+          (rm) => rm.user.id === room.lastMessage?.senderId || 0,
         )?.user.fullname;
 
   const lastMessageContent = room.lastMessage?.isImage

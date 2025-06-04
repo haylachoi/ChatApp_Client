@@ -43,7 +43,7 @@ const useInitChat = () => {
             } else if (currentViewPortStore.lastMessage) {
               currentViewPortStore.lastMessage.scrollIntoView({
                 behavior: 'instant',
-                block: 'end',
+                // block: 'end',
               });
             }
           }, 0);

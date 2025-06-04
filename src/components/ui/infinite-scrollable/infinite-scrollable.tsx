@@ -88,11 +88,13 @@ const InfiniteScrollable = forwardRef<
 
       scrollTopRef.current = element.scrollTop;
     };
+
     const handleGoToLast:
       | React.MouseEventHandler<HTMLButtonElement>
       | undefined = (e) => {
       lastRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
+
     return (
       <div
         className={`${className} infinite-scrollable`}
@@ -114,7 +116,7 @@ const InfiniteScrollable = forwardRef<
         {isFetchingNextMessage && (
           <div className="fetching-indicator fetching-next-indicator">.</div>
         )}
-        <div ref={lastRef}></div>
+        <div ref={lastRef} data-fake-last></div>
         <button
           className="go-to-last-btn"
           onClick={handleGoToLast}
